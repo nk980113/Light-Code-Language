@@ -61,7 +61,7 @@ async function sendMessage (content, waitReturn) {
         data: {}
       },
       containers: {
-        輸出: { type: 'function', value: { type: 'directTo', value: '{內建函數}' } }
+        輸出: { type: 'function', value: { type: 'directTo', value: '{外部函數}' } }
       },
       complexTypes,
       directTo: undefined,
@@ -94,6 +94,10 @@ function getLayer (layer) {
 function addAndRunChunk (upperChunk, line, wait, complexTypes, name, type) {
   let chunkId = generateID(5, Object.keys(actuator.chunks))
   if (wait) upperChunk.state = (type === 'normal') ? `wait-${chunkId}` : `waitAsync-${chunkId}`
+  let directTo = []
+  if (upperChunk.directTo !== undefined) upperChunk.directTo.map((item) => directTo.push(item))
+  directTo.push({id: upperChunk.id, name: upperChunk.name, line})
+  if (directTo.length > 10) directTo.splice(0, 1)
   actuator.chunks[chunkId] = {
     id: chunkId,
     name,
@@ -108,7 +112,7 @@ function addAndRunChunk (upperChunk, line, wait, complexTypes, name, type) {
     },
     containers: {},
     complexTypes,
-    directTo: (upperChunk.directTo === undefined) ? [{id: upperChunk.id, name: upperChunk.name, line}] : upperChunk.directTo.concat({id: upperChunk.id, name: upperChunk.name, line}),
+    directTo,
     returnedData: undefined,
     returnData: { type: 'none', value: '無' },
   }

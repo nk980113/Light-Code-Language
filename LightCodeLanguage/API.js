@@ -1,7 +1,7 @@
 class Actuator {
   #id
-  constructor (code, settings) {
-    this.#id = createActuator(code, settings)
+  constructor (path, settings) {
+    this.#id = createActuator(path, settings)
   }
   get id () {
     return this.#id
@@ -32,7 +32,7 @@ class Actuator {
 }
 
 let JsInterface = class  {
-  static export (object, ) {
+  static export (object) {
 
   }
 } 

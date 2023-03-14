@@ -1,4 +1,6 @@
 const { Worker } = require('worker_threads')
+const fs = require('fs')
+const path = require('path');
 
 let actuators = {}
 
@@ -16,14 +18,17 @@ const log = require('./Log')
 const { defaultSettings, checkSettings } = require('./ActuatorSettings')
 
 //創建執行器
-function createActuator (code, settings) {
+function createActuator (mainFilePath, settings) {
+  if (!fs.existsSync(mainFilePath)) error('error', `找不到檔案 ${mainFilePath}`)
+  if (path.extname(mainFilePath) !== '.lcl') error('error', `文件的副檔名必須為 .lcl`)
   let id = generateID(5, Object.keys(actuators))
   actuators[id] = {
+    mainFilePath,
     state: 'idle',
     vMem: undefined,
     log: [],
     settings: checkSettings(defaultValue(defaultSettings, settings)),
-    code,
+    code: fs.readFileSync(mainFilePath, 'utf8'),
     worker: undefined,
     events: {},
     executionStopCallBack: undefined

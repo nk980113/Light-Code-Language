@@ -75,7 +75,6 @@ function executeLoop () {
 
 //運行區塊
 function runChunk (chunk) {
-  if (actuator.state === 'stopping') return
   let complexType = chunk.complexTypes[chunk.executiveData.row]
   if (complexType === undefined) {
     if (chunk.directTo !== undefined) {
@@ -84,9 +83,7 @@ function runChunk (chunk) {
         actuator.chunks[chunk.directTo[chunk.directTo.length-1].id].state = 'running'
       }
     }
-    if (chunk.id === 'main') {
-      actuator.returnData = chunk.returnData
-    }
+    if (chunk.id === 'main') actuator.returnData = chunk.returnData
     delete actuator.chunks[chunk.id]
     removeTesk(chunk.id)
     return

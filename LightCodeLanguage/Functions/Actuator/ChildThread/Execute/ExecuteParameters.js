@@ -25,7 +25,7 @@ function executeParameters (chunk, complexType) {
           chunk.executiveData.data = {}
         } else {
           if (chunk.returnData.type === 'string') {
-            let complexTypes = analysis(string.returnData.value)
+            let complexTypes = analysis(chunk.returnData.value)
             if (!Array.isArray(complexType)) throwError(chunk, complexTypes)
             addAndRunChunk(chunk, complexType.line, true, complexTypes, chunk.name, 'normal')
             return true
