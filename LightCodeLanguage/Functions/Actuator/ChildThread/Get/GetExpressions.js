@@ -55,6 +55,8 @@ function getExpressions (chunk, complexType) {
       for (let run = 0; run < chunk.executiveData.data.expressions.length; run++) {
         if (chunk.executiveData.data.expressions[run].type === 'operators') {
           if (chunk.executiveData.data.expressions[run].value === '==') string+='==='
+          else if (chunk.executiveData.data.expressions[run].value === '或') string+='||'
+          else if (chunk.executiveData.data.expressions[run].value === '且') string+='&&'
           else string+=chunk.executiveData.data.expressions[run].value
         } else {
           data = getExpressionsValue(chunk, chunk.executiveData.data.expressions[run])

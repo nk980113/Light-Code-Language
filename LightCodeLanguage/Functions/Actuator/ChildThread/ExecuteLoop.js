@@ -77,11 +77,9 @@ function executeLoop () {
 function runChunk (chunk) {
   let complexType = chunk.complexTypes[chunk.executiveData.row]
   if (complexType === undefined) {
-    if (chunk.directTo !== undefined) {
-      if ((chunk.type === `async` && actuator.chunks[chunk.directTo[chunk.directTo.length-1].id].state === `syncWait-${chunk.id}`) || (chunk.type === `normal` && actuator.chunks[chunk.directTo[chunk.directTo.length-1].id].state === `wait-${chunk.id}`)) {
-        actuator.chunks[chunk.directTo[chunk.directTo.length-1].id].returnedData = chunk.returnData
-        actuator.chunks[chunk.directTo[chunk.directTo.length-1].id].state = 'running'
-      }
+    if (chunk.directTo !== undefined && actuator.chunks[chunk.directTo[0].id].state === `wait-${chunk.id}`) {
+      actuator.chunks[chunk.directTo[0].id].returnedData = chunk.returnData
+      actuator.chunks[chunk.directTo[0].id].state = 'running'
     }
     if (chunk.id === 'main') actuator.returnData = chunk.returnData
     delete actuator.chunks[chunk.id]

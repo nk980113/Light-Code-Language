@@ -21,6 +21,7 @@ const logError = require('./LogError')
 const analysis = require('../../Analysis/Analysis')
 const { addTask, executeLoop } = require('./ExecuteLoop')
 const checkVMemory = require('./VMemoryManager')
+const log = require('./Log')
 
 let messages = {}
 parentPort.addListener('message', (msg) => {
@@ -51,7 +52,7 @@ async function sendMessage (content, waitReturn) {
     actuator.chunks.main = {
       id: 'main',
       name: '全局',
-      type: 'normal', //async
+      type: 'chunk', //chunk, childChunk
       layer: '0,0', //層, 編號
       state: 'running', //wait, waitAsync
       executiveData: {
@@ -93,11 +94,20 @@ function getLayer (layer) {
 //添加區塊
 function addAndRunChunk (upperChunk, line, wait, complexTypes, name, type) {
   let chunkId = generateID(5, Object.keys(actuator.chunks))
-  if (wait) upperChunk.state = (type === 'normal') ? `wait-${chunkId}` : `waitAsync-${chunkId}`
+  if (wait) upperChunk.state = `wait-${chunkId}`
   let directTo = []
   if (upperChunk.directTo !== undefined) upperChunk.directTo.map((item) => directTo.push(item))
-  directTo.push({id: upperChunk.id, name: upperChunk.name, line})
-  if (directTo.length > 10) directTo.splice(0, 1)
+  directTo.splice(0, 0, {id: upperChunk.id, name: upperChunk.name, line})
+  if (directTo.length > actuator.settings.maxCallLength) {
+    let string = `錯誤: 呼叫長度超出上限 (${directTo.length} / ${actuator.settings.maxCallLength})\n\n區塊資料:\n｜ID: ${upperChunk.id}\n｜名稱: ${upperChunk.name}\n｜呼叫路徑:\n｜｜\n`
+    directTo.map((item) => {
+      string+=`｜｜[ID: ${item.id} - 名稱: ${item.name}] 在地 ${item.line} 行\n`
+    })
+    log(string)
+    actuatorLog('complete', '以停止執行')
+    sendMessage({ type: 'executionStop', data: { error: 'vMemMotEnough' } })
+    process.exit()
+  }
   actuator.chunks[chunkId] = {
     id: chunkId,
     name,

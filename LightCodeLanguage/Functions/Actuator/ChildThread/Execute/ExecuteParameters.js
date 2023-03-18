@@ -21,7 +21,7 @@ function executeParameters (chunk, complexType) {
         return true
       } else {
         if (chunk.complexTypes[chunk.executiveData.row-1] === undefined) {
-          chunk.returnedData = chunk.executiveData.data.parameters[0]
+          chunk.returnData = chunk.executiveData.data.parameters[0]
           chunk.executiveData.data = {}
         } else {
           if (chunk.returnData.type === 'string') {
@@ -32,10 +32,11 @@ function executeParameters (chunk, complexType) {
           } else if (chunk.returnData.type === 'function') {
             let chunk2
             if (chunk.returnData.async) {
-              if (chunk.executiveData.mode === 'wait') chunk2 = addAndRunChunk(chunk, complexType.line, true, chunk.returnData.value, (chunk.returnData.container === undefined) ? '函數' : chunk.returnData.container, 'async')
-              else chunk2 = addAndRunChunk(chunk, complexType.line, false, chunk.returnData.value, (chunk.returnData.container === undefined) ? '函數' : chunk.returnData.container, 'async')
+              if (chunk.executiveData.mode === 'wait') chunk2 = addAndRunChunk(chunk, complexType.line, true, chunk.returnData.value, (chunk.returnData.container === undefined) ? '函數' : chunk.returnData.container, 'chunk')
+              else chunk2 = addAndRunChunk(chunk, complexType.line, false, chunk.returnData.value, (chunk.returnData.container === undefined) ? '函數' : chunk.returnData.container, 'chunk')
             } else {
-              chunk2 = addAndRunChunk(chunk, complexType.line, true, chunk.returnData.value, (chunk.returnData.container === undefined) ? '函數' : chunk.returnData.container, 'normar')
+              if (chunk.executiveData.mode === 'async') chunk2 = addAndRunChunk(chunk, complexType.line, false, chunk.returnData.value, (chunk.returnData.container === undefined) ? '函數' : chunk.returnData.container, 'chunk')
+              else chunk2 = addAndRunChunk(chunk, complexType.line, true, chunk.returnData.value, (chunk.returnData.container === undefined) ? '函數' : chunk.returnData.container, 'chunk')
             }
             for (let run = 0; run < chunk.returnData.parameters.length; run++) {
               if (getContainer(chunk.layer, chunk.returnData.parameters[run]) === undefined) {

@@ -6,13 +6,13 @@ const { addAndRunChunk } = require('../Actuator')
 function executeIndex (chunk, complexType) {
   if (chunk.returnedData === undefined) {
     chunk.executiveData.data = { count: 0, index: [] }
-    addAndRunChunk(chunk, complexType.line, true, complexType.value[0], chunk.name, 'normal')
+    addAndRunChunk(chunk, complexType.line, true, complexType.value[0], chunk.name, 'childChunk')
     return true
   } else {
     chunk.executiveData.data.index.push(chunk.returnedData)
     chunk.executiveData.data.count++
     if (chunk.executiveData.data.count < complexType.value.length) {
-      addAndRunChunk(chunk, complexType.line, true, complexType.value[chunk.executiveData.data.count], chunk.name, 'normal')
+      addAndRunChunk(chunk, complexType.line, true, complexType.value[chunk.executiveData.data.count], chunk.name, 'childChunk')
       return true
     } else {
       if (chunk.returnData.type === 'string' || chunk.returnData.type === 'number') {

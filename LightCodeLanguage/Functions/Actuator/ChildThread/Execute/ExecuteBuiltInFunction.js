@@ -25,11 +25,11 @@ function executeBuiltInFunction (chunk, complexType) {
                 if (chunk.complexTypes[run].type !== 'newLine') chunk2.push(chunk.complexTypes[run])
               }
             }
-            chunk.executiveData.data = { mode: (chunk.executiveData.mode === 'readOnly') ? 'readOnly' : 'normal' }
-            addAndRunChunk(chunk, complexType.line, true, chunk2, chunk.name, 'normal')
+            chunk.executiveData.data = { mode: (chunk.executiveData.mode === 'readOnly') ? 'readOnly' : 'childChunk' }
+            addAndRunChunk(chunk, complexType.line, true, chunk2, chunk.name, 'childChunk')
             return true
           } else {
-            chunk.containers[chunk.complexTypes[chunk.executiveData.row+1].value] = { type: 'none', value: '無' , mode: (chunk.executiveData.mode === 'readOnly') ? 'readOnly' : 'normal' }
+            chunk.containers[chunk.complexTypes[chunk.executiveData.row+1].value] = { type: 'none', value: '無' , mode: (chunk.executiveData.mode === 'readOnly') ? 'readOnly' : 'childChunk' }
             chunk.returnData = { type: 'none', value: '無', container: chunk.complexTypes[chunk.executiveData.row+1].value, path: [] }
             chunk.executiveData.mode = undefined
             chunk.executiveData.row += 1
@@ -39,7 +39,7 @@ function executeBuiltInFunction (chunk, complexType) {
         }
       }
     } else {
-      chunk.containers[chunk.complexTypes[chunk.executiveData.row+1].value] = Object.assign(chunk.returnedData, { mode: (chunk.executiveData.mode === 'readOnly') ? 'readOnly' : 'normal' })
+      chunk.containers[chunk.complexTypes[chunk.executiveData.row+1].value] = Object.assign(chunk.returnedData, { mode: (chunk.executiveData.mode === 'readOnly') ? 'readOnly' : 'childChunk' })
       chunk.returnData = chunk.containers[chunk.complexTypes[chunk.executiveData.row+1].value]
       chunk.executiveData.mode = undefined
       chunk.executiveData.data = {}
@@ -107,21 +107,87 @@ function executeBuiltInFunction (chunk, complexType) {
           if (chunk.complexTypes[run].type !== 'newLine') chunk2.push(chunk.complexTypes[run])
         }
       }
-      addAndRunChunk(chunk, complexType.line, true, chunk2, chunk.name, 'normal')
+      addAndRunChunk(chunk, complexType.line, true, chunk2, chunk.name, 'childChunk')
       return true
     } else {
-      if (chunk.directTo !== undefined) {
-        if ((chunk.type === `async` && actuator.chunks[chunk.directTo[chunk.directTo.length-1].id].state === `syncWait-${chunk.id}`) || (chunk.type === `normal` && actuator.chunks[chunk.directTo[chunk.directTo.length-1].id].state === `wait-${chunk.id}`)) {
-          actuator.chunks[chunk.directTo[chunk.directTo.length-1].id].returnedData = chunk.returnData
-          actuator.chunks[chunk.directTo[chunk.directTo.length-1].id].state = 'running'
+      chunkOut(chunk)
+      return
+      if (complexType === undefined) {
+        if (chunk.directTo !== undefined && actuator.chunks[chunk.directTo[0].id].state === `wait-${chunk.id}`) {
+          actuator.chunks[chunk.directTo[0].id].returnedData = chunk.returnedData
+          actuator.chunks[chunk.directTo[0].id].state = 'running'
+        }
+        if (chunk.id === 'main') actuator.returnData = chunk.returnData
+        delete actuator.chunks[chunk.id]
+        removeTesk(chunk.id)
+        return
+      }
+    } 
+  } else if (complexType.value === '重複') {
+    if (chunk.executiveData.data.condition === undefined) {
+      if (chunk.returnedData === undefined) {
+        if (chunk.complexTypes[chunk.executiveData.row+1].type !== 'parameters' && chunk.complexTypes[chunk.executiveData.row+2].type !== 'chunk') throwError(chunk, { error: true, content: `<內建功能> 唯讀 的後面只能為一個 <內建功能> 或 <容器>(在物件裡)`, start: complexType.start, end: complexType.end, path: [{ func: (chunk.name === '全局') ? undefined : chunk.name, line: complexType.line }]})
+        chunk.executiveData.data = { condition: undefined, newCondition: undefined, count: 0 }
+        addAndRunChunk(chunk, complexType.line, true, [chunk.complexTypes[chunk.executiveData.row+1]], chunk.name, 'childChunk')
+        return true
+      } else {
+        if (chunk.returnedData.type !== 'number' && chunk.returnedData.type !== 'boolean') throwError(chunk, { error: true, content: `給予 <內建功能> 重複 的值只能為 <數字> 或 <布林值>`, start: chunk.complexTypes[chunk.executiveData.row+1].start, end: chunk.complexTypes[chunk.executiveData.row+1].end, path: [{ func: (chunk.name === '全局') ? undefined : chunk.name, line: chunk.complexTypes[chunk.executiveData.row+1].line }]})
+        chunk.executiveData.data.condition = chunk.returnedData
+        chunk.executiveData.data.newCondition = chunk.returnedData
+        addAndRunChunk(chunk, complexType.line, true, [chunk.complexTypes[chunk.executiveData.row+2]], chunk.name, 'childChunk')
+        return true
+      }
+    } else {
+      if (chunk.executiveData.data.newCondition === undefined) {
+        if (chunk.returnedData === undefined) {
+          addAndRunChunk(chunk, complexType.line, true, [chunk.complexTypes[chunk.executiveData.row+1]], chunk.name, 'childChunk')
+          return true
+        } else {
+          chunk.executiveData.data.newCondition = chunk.returnedData
+          chunk.returnedData = undefined
+          return true
+        }
+      } else {
+        if (chunk.returnedData === undefined) {
+          if ((chunk.executiveData.data.condition.type === 'number' && chunk.executiveData.data.count >= chunk.executiveData.data.condition.value) || (chunk.executiveData.data.condition.type === 'boolean' && chunk.executiveData.data.condition.value === '否')) {
+            chunk.executiveData.row+=2
+          } else {
+            if (chunk.executiveData.data.condition.type === 'number') chunk.executiveData.data.count++
+            addAndRunChunk(chunk, complexType.line, true, chunk.complexTypes[chunk.executiveData.row+2].value, '{重複}', 'childChunk')
+            return true
+          }
+        } else {
+          chunk.executiveData.data.condition = chunk.executiveData.data.newCondition
+          chunk.executiveData.data.newCondition = undefined
+          chunk.returnedData = undefined
+          return true
         }
       }
-      if (chunk.id === 'main') {
-        actuator.returnData = chunk.returnData
+    }
+  }
+}
+
+//退出區塊
+function chunkOut (chunk) {
+  if (chunk.type === 'chunk') {
+    if (actuator.chunks[chunk.directTo[0].id].state === `wait-${chunk.id}`) {
+      console.log(true)
+      actuator.chunks[chunk.directTo[0].id].returnedData = chunk.returnedData
+      actuator.chunks[chunk.directTo[0].id].state = 'running'
+    }
+    delete actuator.chunks[chunk.id]
+    removeTesk(chunk.id)
+  } else {
+    for (let run = 0; run < chunk.directTo.length; run++) {
+      if (actuator.chunks[chunk.directTo[run].id].type === 'chunk') {
+        chunkOut(actuator.chunks[chunk.directTo[run].id])
+        break
+      } else {
+        delete actuator.chunks[chunk.directTo[run].id]
+        removeTesk(chunk.directTo[run].id)
       }
-      delete actuator.chunks[chunk.id]
-      removeTesk(chunk.id)
-      return true
-    } 
+    }
+    delete actuator.chunks[chunk.id]
+    removeTesk(chunk.id)
   }
 }

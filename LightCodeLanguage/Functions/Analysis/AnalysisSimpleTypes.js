@@ -1,6 +1,7 @@
 module.exports = analysisSimpleTypes
 
 const operators = '+-*/><=或且'
+const builtInFunctions = require('../BuiltInFunctions.json')
 
 //分析代碼成簡易類型
 function analysisSimpleTypes (code) {
@@ -52,16 +53,16 @@ function analysisSimpleTypes (code) {
         run+=1
       } else if (code[run] === '.') {
         state = { nowType: 'key', value: '', start: run }
-      } else if (code[run] === '的' && code[run] === '從') {
+      } else if (builtInFunctions.includes(code[run])) {
         simpleTypes.push({ type: 'builtInFunction', value: code[run], line, layer, start: run, end: run+1 })
-      } else if (code.substring(run, run+2) === '導入' || code.substring(run, run+2) === '變數' || code.substring(run, run+2) === '唯讀' || code.substring(run, run+2) === '等待' || code.substring(run, run+2) === '函數' || code.substring(run, run+2) === '返回' || code.substring(run, run+2) === '刪除' || code.substring(run, run+2) === '如果' || code.substring(run, run+2) === '否則' || code.substring(run, run+2) === '重複') {
+      } else if (builtInFunctions.includes(code.substring(run, run+2))) {
         simpleTypes.push({ type: 'builtInFunction', value: code.substring(run, run+2), line, layer, start: run, end: run+1 })
         run+=1
-      } else if (code.substring(run, run+3) === '異同步') {
+      } else if (builtInFunctions.includes(code.substring(run, run+3))) {
         simpleTypes.push({ type: 'builtInFunction', value: '異同步', line, layer, start: run, end: run+1 })
         run+=2
-      } else if (code.substring(run, run+4) === '如果否則') {
-        simpleTypes.push({ type: 'builtInFunction', value: '如果否則', line, layer, start: run, end: run+1 })
+      } else if (builtInFunctions.includes(code.substring(run, run+4))) {
+        simpleTypes.push({ type: 'builtInFunction', value: '否則如果', line, layer, start: run, end: run+1 })
         run+=3
       } else {
         state = { nowType: 'container', value: code[run], start: run }
