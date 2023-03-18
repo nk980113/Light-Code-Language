@@ -9,7 +9,7 @@ let actuator = {
     tasks: [],
     nowTask: 0
   },
-  returnData: undefined
+  returnData: undefined,
 }
 
 module.exports = { actuator, sendMessage, addAndRunChunk }

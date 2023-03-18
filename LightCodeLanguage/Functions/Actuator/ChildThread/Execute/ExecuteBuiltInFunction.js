@@ -110,7 +110,7 @@ function executeBuiltInFunction (chunk, complexType) {
       addAndRunChunk(chunk, complexType.line, true, chunk2, chunk.name, 'childChunk')
       return true
     } else {
-      chunkOut(chunk)
+      chunkOut(chunk, true)
       return
       if (complexType === undefined) {
         if (chunk.directTo !== undefined && actuator.chunks[chunk.directTo[0].id].state === `wait-${chunk.id}`) {
@@ -168,19 +168,24 @@ function executeBuiltInFunction (chunk, complexType) {
 }
 
 //退出區塊
-function chunkOut (chunk) {
+function chunkOut (chunk, first) {
   if (chunk.type === 'chunk') {
     if (actuator.chunks[chunk.directTo[0].id].state === `wait-${chunk.id}`) {
-      console.log(true)
-      actuator.chunks[chunk.directTo[0].id].returnedData = chunk.returnedData
+      console.log(chunk.returnedData)
+      actuator.chunks[chunk.directTo[0].id].returnData = (first && chunk.returnedData !== undefined) ? chunk.returnedData : { type: 'none', value: '無' }
+      actuator.chunks[chunk.directTo[0].id].executiveData.row = Infinity
       actuator.chunks[chunk.directTo[0].id].state = 'running'
+      // if (chunk.directTo[0].id === 'main') actuator.returnData = (first && chunk.returnedData !== undefined) ? chunk.returnedData : { type: 'none', value: '無' }
+      // actuator.chunks[chunk.directTo[0].id].returnedData = (first && chunk.returnedData !== undefined) ? chunk.returnedData : { type: 'none', value: '無' }
+      // actuator.chunks[chunk.directTo[0].id].state = 'running'
     }
     delete actuator.chunks[chunk.id]
     removeTesk(chunk.id)
   } else {
     for (let run = 0; run < chunk.directTo.length; run++) {
       if (actuator.chunks[chunk.directTo[run].id].type === 'chunk') {
-        chunkOut(actuator.chunks[chunk.directTo[run].id])
+        actuator.chunks[chunk.directTo[run].id].returnedData = chunk.returnedData
+        chunkOut(actuator.chunks[chunk.directTo[run].id], true)
         break
       } else {
         delete actuator.chunks[chunk.directTo[run].id]
