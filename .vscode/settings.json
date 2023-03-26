@@ -1,0 +1,3 @@
+{
+    "typescript.tsdk": "./ts-refactor/node_modules/typescript/lib"
+}
