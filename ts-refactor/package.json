@@ -1,5 +1,6 @@
 {
   "type": "module",
+  "main": "dist/index.js",
   "devDependencies": {
     "tsup": "^6.7.0",
     "typescript": "^5.0.2"
@@ -12,5 +13,9 @@
     "typed-emitter": "^2.1.0",
     "zod": "^3.21.2",
     "zod-i18n-map": "^2.8.0"
+  },
+  "scripts": {
+    "build": "tsup --dts",
+    "test": "tsup --keepNames && node --experimental-specifier-resolution=node test.js"
   }
 }

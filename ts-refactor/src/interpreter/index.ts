@@ -1,23 +1,29 @@
 import { readFile, stat } from 'node:fs/promises';
-import { extname } from 'node:path';
+import { extname, join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { inspect } from 'node:util';
+import { Worker } from 'node:worker_threads';
 import EventEmitter from 'node:events';
 import TypedEmitterNamespace from 'typed-emitter';
 import autoBind from 'auto-bind';
+import { EventType, MessageType, Status, WorkerMessage } from '../types.js';
 import { outputConfigValidator, OutputConfig } from '../utils/logger.js';
 import z, { wrapZodError } from '../utils/z.js';
 import Logger from '../utils/logger.js';
 import randomId from '../utils/random.js';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 type TypedEmitter<T extends TypedEmitterNamespace.EventMap> = TypedEmitterNamespace.default<T>
 
-class Interpreter {
-    static async create(filePath: string, config: InterpreterConfig) {
+export class Interpreter {
+    static async create(filePath: string, config: InterpreterConfig = {}) {
         const { id, instance } = await InternalInterpreter.create(filePath, config);
         return new Interpreter(id, instance);
     }
 
     readonly id: string;
+    run: () => Promise<unknown>;
 
     private constructor(id: string, private instance: InternalInterpreter) {
         Object.defineProperty(this, 'id', {
@@ -25,11 +31,16 @@ class Interpreter {
             writable: false,
             configurable: false,
         });
+        this.run = this.instance.run;
+    }
+
+    on<T extends EventType>(event: T, listener: InternalInterpreterEventsMap[T]) {
+        this.instance.listener.on(event, listener);
     }
 }
 
 type InternalInterpreterEventsMap = {
-    stateChange(status: Status): void;
+    [EventType.StateChange](status: Status): void;
 }
 
 class InternalInterpreter {
@@ -64,31 +75,95 @@ class InternalInterpreter {
         }
 
         const content = await readFile(filePath, { encoding: 'utf-8' });
-        const instance = new InternalInterpreter(filePath, content);
+        const instance = new InternalInterpreter(filePath, content, config, logger);
         const id = randomId(5, Object.keys(this.instances))
         return { id, instance };
     }
 
-    private constructor(public filePath: string, public content: string) {
+    private constructor(
+        public filePath: string,
+        public content: string,
+        public config: InterpreterConfig,
+        public logger: Logger,
+    ) {
         this.listener = new EventEmitter() as TypedEmitter<InternalInterpreterEventsMap>;
         this.state = { status: Status.Idle };
 
         autoBind(this);
     }
+
+    run() {
+        return new Promise((res, rej) => {
+            if (this.state.status !== Status.Idle) {
+                return rej(`無法執行狀態不為idle的執行器(狀態：${this.state.status})`);
+            }
+
+            // TODO: translate the size part
+
+            this.state = {
+                status: Status.Pending,
+                onComplete: (result) => {
+                    if (!result.success) {
+                        this.logger.runtimeError('執行時出現錯誤');
+                        // @ts-ignore
+                        this.logger.runtimeError(result.error);
+                        // @ts-ignore
+                        rej(result.error);
+                    } else {
+                        res(result.data);
+                    }
+                },
+                worker: new Worker(join(__dirname, 'worker.js'), { workerData: {} }).on('message', this.listenMessage),
+            }
+        });
+    }
+
+    private listenMessage(message: WorkerMessage) {
+        switch (message.type) {
+            case MessageType.Stop: {
+                (this.state as NonIdleState).onComplete(message.data);
+                this.state = { status: Status.Idle };
+                break;
+            }
+            case MessageType.Event: {
+                const { event } = message;
+                switch (event.name) {
+                    case EventType.StateChange: {
+                        this.state = {
+                            ...(this.state as NonIdleState),
+                            status: event.value,
+                        };
+                        this.listener.emit(EventType.StateChange, event.value);
+                    }
+                }
+                break;
+            }
+            // TODO: implement others
+        }
+    }
 }
 
-enum Status {
-    Idle = 'idle',
-    Compiling = 'compiling',
-    Running = 'running',
-}
+
 
 type InternalInterpreterState =
-    | IdleState;
+    | IdleState
+    | NonIdleState;
 
 type IdleState = {
-    status: Status.Idle,
+    status: Status.Idle;
 };
+
+type NonIdleState = {
+    status: Exclude<Status, Status.Idle>;
+    onComplete(result: {
+        success: true;
+        data: any;
+    } | {
+        success: false;
+        error: string;
+    }): void;
+    worker: Worker;
+}
 
 const performanceConfigValidator = z.object({
     chunkPerExecution: z.number().positive().finite().default(100),
@@ -106,4 +181,5 @@ const fsConfigValidator = z.object({
 
 const configValidator = performanceConfigValidator.merge(outputConfigValidator).merge(fsConfigValidator);
 
-type InterpreterConfig = z.infer<typeof configValidator>;
+export type InterpreterConfig = z.infer<typeof configValidator>;
+export { Status };

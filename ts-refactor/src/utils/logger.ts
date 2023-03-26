@@ -38,6 +38,10 @@ export default class Logger {
         console.error(Logger.makeContent(`${Logger.prefix}${position} ${Logger.errorPrefix}`, [...content.map((v, i) => `${i} ${v}`), '由於上述錯誤，將自動退出程式']));
         process.exit(1);
     }
+
+    runtimeError(content: string) {
+        this.error('Runtime', content);
+    }
 }
 
 export const outputConfigValidator = z.object({
