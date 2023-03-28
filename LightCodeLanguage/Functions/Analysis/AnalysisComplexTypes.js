@@ -51,10 +51,12 @@ function analysisComplexTypes (simpleTypes) {
             if (!Array.isArray(data)) return data
             data = checkSyntax(data)
             if (!Array.isArray(data)) {
-              if (data.type === 'extraSymbol') return { error: true, content: `在陣列的第 ${items.length} 多出了一個符號 ${data.symbol}`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
-              if (data.type === 'mustBeExpressions') return { error: true, content: `陣列的第 ${items.length} 項必須為運算式 (多出運算符 ${data.operators})`, path: [{ func: '{分析器}' }, { line: data.line }]}
-              if (data.type === 'extraOperators') return { error: true, content: `在陣列的第 ${items.length} 多出了一個運算符 ${data.operators}`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
-              if (data.type === 'builtInFunction') return { error: true, content: `<內建功能> ${data.functionName} 的後面只能為一個 ${data.mustBe.join(' 或 ')}`, path: [{ func: '{分析器}' }, { line: data.line }] }
+              if (data.type === 'extraSymbol') return { error: true, content: `在陣列的第 ${items.length} 項多出了一個符號 ${data.symbol}`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
+              else if (data.type === 'mustBeExpressions') return { error: true, content: `陣列的第 ${items.length} 項必須為運算式 (多出運算符 ${data.operators})`, path: [{ func: '{分析器}' }, { line: data.line }]}
+              else if (data.type === 'extraOperators') return { error: true, content: `在陣列的第 ${items.length} 項多出了一個運算符 ${data.operators}`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
+              else if (data.type === 'builtInFunction') return { error: true, content: `<內建功能> ${data.functionName} 的後面只能為一個 ${data.mustBe.join(' 或 ')}`, path: [{ func: '{分析器}' }, { line: data.line }] }
+              else if (data.type === 'builtInFunctionNextMustBe') return { error: true, content: `<內建功能> ${data.functionName} 的後面必須為 ${data.mustBe}`, path: [{ func: '{分析器}' }, { line: data.line }] }
+              else if (data.type === 'extraBuiltInFunction') return { error: true, content: `在陣列的第 ${items.length} 項多出了一個 <內建功能> ${data.builtInFunction}`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
               return { error: true, content: `在陣列的第 ${items.length} 項中少了一個 ,`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
             }
             items.push(checkSyntax(analysisComplexTypes(chunk)))
@@ -78,9 +80,11 @@ function analysisComplexTypes (simpleTypes) {
             const data = checkSyntax(chunk)
             if (!Array.isArray(data)) {
               if (data.type === 'extraSymbol') return { error: true, content: `多出符號 ${data.symbol}`, path: [{ func: '{分析器}' }, { line: data.line }]}
-              if (data.type === 'mustBeExpressions') return { error: true, content: `必須為運算式 (多出運算符 ${data.operators})`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
-              if (data.type === 'extraOperators') return { error: true, content: `多出運算符 ${data.operators}`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
-              if (data.type === 'builtInFunction') return { error: true, content: `<內建功能> ${data.functionName} 的後面只能為一個 ${data.mustBe.join(' 或 ')}`, path: [{ func: '{分析器}' }, { line: data.line }] }
+              else if (data.type === 'mustBeExpressions') return { error: true, content: `必須為運算式 (多出運算符 ${data.operators})`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
+              else if (data.type === 'extraOperators') return { error: true, content: `多出運算符 ${data.operators}`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
+              else if (data.type === 'builtInFunction') return { error: true, content: `<內建功能> ${data.functionName} 的後面只能為一個 ${data.mustBe.join(' 或 ')}`, path: [{ func: '{分析器}' }, { line: data.line }] }
+              else if (data.type === 'builtInFunctionNextMustBe') return { error: true, content: `<內建功能> ${data.functionName} 的後面必須為 ${data.mustBe}`, path: [{ func: '{分析器}' }, { line: data.line }] }
+              else if (data.type === 'extraBuiltInFunction') return { error: true, content: `多出了一個 <內建功能> ${data.builtInFunction}`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
               return { error: true, content: `語法錯誤 (<${data.typeName}> 的後面不能為 <${data.typeName2}>)`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}  
             }
             chunk = []
@@ -112,10 +116,12 @@ function analysisComplexTypes (simpleTypes) {
                 data = checkSyntax(data)
                 if (!Array.isArray(data)) {
                   if (data.type === 'extraSymbol') return { error: true, content: `物件的鑰 ${key.value} 的值多出了一個 ${data.symbol}`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
-                  if (data.type === 'mustBeExpressions') return { error: true, content: `物件的鑰 ${key.value} 的值必須為運算式 (多出運算符 ${data.operators})`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
-                  if (data.type === 'extraOperators') return { error: true, content: `物件的鑰 ${key.value} 的值多出了一個運算符 ${data.operators}`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
-                  if (data.type === 'builtInFunction') return { error: true, content: `<內建功能> ${data.functionName} 的後面只能為一個 ${data.mustBe.join(' 或 ')}`, path: [{ func: '{分析器}' }, { line: data.line }] }
-                  if (data.typeName2 === '字串' || data.typeName2 === '容器') return { error: true, content: `物件的鑰 ${key.value} 的值缺少一個 ,`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
+                  else if (data.type === 'mustBeExpressions') return { error: true, content: `物件的鑰 ${key.value} 的值必須為運算式 (多出運算符 ${data.operators})`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
+                  else if (data.type === 'extraOperators') return { error: true, content: `物件的鑰 ${key.value} 的值多出了一個運算符 ${data.operators}`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
+                  else if (data.type === 'builtInFunction') return { error: true, content: `<內建功能> ${data.functionName} 的後面只能為一個 ${data.mustBe.join(' 或 ')}`, path: [{ func: '{分析器}' }, { line: data.line }] }
+                  else if (data.type === 'builtInFunctionNextMustBe') return { error: true, content: `<內建功能> ${data.functionName} 的後面必須為 ${data.mustBe}`, path: [{ func: '{分析器}' }, { line: data.line }] }
+                  else if (data.type === 'extraBuiltInFunction') return { error: true, content: `物件的鑰 ${key.value} 的值多出了一個 <內建功能> ${data.builtInFunction}`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
+                  else if (data.typeName2 === '字串' || data.typeName2 === '容器') return { error: true, content: `物件的鑰 ${key.value} 的值缺少一個 ,`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
                   return { error: true, content: `物件的鑰 ${key.value} 的值存在語法錯誤 (<${data.typeName}> 的後面不能為 <${data.typeName2}>)`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
                 }
                 if (chunk[0].type === 'builtInFunction' && chunk[0].value === '唯讀') object[chunk[1].value] = Object.assign(data, { mode: 'readOnly' })
@@ -163,6 +169,8 @@ function analysisComplexTypes (simpleTypes) {
               if (data.type === 'mustBeExpressions') return { error: true, content: `參數列的第 ${items.length} 項必須為運算式 (多出運算符 ${data.operators})`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
               if (data.type === 'extraOperators') return { error: true, content: `在參數列的第 ${items.length} 項多出了一個運算符 ${data.operators}`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
               if (data.type === 'builtInFunction') return { error: true, content: `<內建功能> ${data.functionName} 的後面只能為一個 ${data.mustBe.join(' 或 ')}`, path: [{ func: '{分析器}' }, { line: data.line }] }
+              if (data.type === 'builtInFunctionNextMustBe') return { error: true, content: `<內建功能> ${data.functionName} 的後面必須為 ${data.mustBe}`, path: [{ func: '{分析器}' }, { line: data.line }] }
+              if (data.type === 'extraBuiltInFunction') return { error: true, content: `在參數列的第 ${items.length} 項多出了一個 <內建功能> ${data.builtInFunction}`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
               return { error: true, content: `在參數列的第 ${items.length} 項中少了一個 ,`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
             }
             items.push(checkSyntax(analysisComplexTypes(chunk)))
@@ -191,6 +199,7 @@ function analysisComplexTypes (simpleTypes) {
               if (data.type === 'mustBeExpressions') return { error: true, content: `索引列的第 ${items.length} 項必須為運算式 (多出運算符 ${data.operators})`, path: [{ func: '{分析器}' }, { line: data.line }]}
               if (data.type === 'extraOperators') return { error: true, content: `在索引列的第 ${items.length} 多出了一個運算符 ${data.operators}`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
               if (data.type === 'builtInFunction') return { error: true, content: `<內建功能> ${data.functionName} 的後面只能為一個 ${data.mustBe.join(' 或 ')}`, path: [{ func: '{分析器}' }, { line: data.line }] }
+              if (data.type === 'extraBuiltInFunction') return { error: true, content: `在索引列的第 ${items.length} 項多出了一個 <內建功能> ${data.builtInFunction}`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
               return { error: true, content: `在索引列的第 ${items.length} 項中少了一個 ,`, start: data.start, end: data.end, path: [{ func: '{分析器}' }, { line: data.line }]}
             }
             items.push(checkSyntax(analysisComplexTypes(chunk)))

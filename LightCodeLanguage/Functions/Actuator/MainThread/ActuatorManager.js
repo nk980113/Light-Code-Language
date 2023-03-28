@@ -56,7 +56,7 @@ function listenMessage (msg) {
 //運行執行器
 async function runActuator (id) {
   return new Promise((resolve, reject) => {
-    if (actuators[id].state !== 'idle') error('error', `無法運行執行器 ${id} (通常是因為執行器正在編譯, 執行, 停止) [執行器狀態: ${actuators[id].state}]`)
+    if (actuators[id].state !== 'idle') error('error', `無法運行執行器 ${id} (通常是因為執行器正在分析, 執行, 停止) [執行器狀態: ${actuators[id].state}]`)
     if (getVariableSize(actuators[id].code) > actuators[id].settings.vMemCanUsed) {
       log(id, `代碼的大小超出記憶體的上限 (${Math.round((getVariableSize(actuators[id].code)/1000000)*100)/100} MB / ${Math.round((actuators[id].settings.vMemCanUsed/1000000)*100)/100} MB)`)
     } else {
@@ -69,7 +69,7 @@ async function runActuator (id) {
           resolve(data)
         }
       }
-      actuators[id].worker = new Worker(getPath(__dirname, ['<', 'ChildThread', 'Actuator.js']), { workerData: { actuatorId: id, settings: actuators[id].settings, code: actuators[id].code }}) 
+      actuators[id].worker = new Worker(getPath(__dirname, ['<', 'ChildThread', 'Actuator.js']), { workerData: { actuatorId: id, settings: actuators[id].settings, code: actuators[id].code, path: actuators[id].path }}) 
       actuators[id].worker.addListener('message', listenMessage)
     }
   })
@@ -77,7 +77,7 @@ async function runActuator (id) {
 
 //停止執行器
 async function stopActuator (id) {
-  if (actuators[id].state !== 'analysis' &&actuators[id].state !== 'running') {
+  if (actuators[id].state !== 'analyzing' &&actuators[id].state !== 'running') {
     error('error', `無法停止執行器 ${id} (通常是因為執行器運行) [執行器狀態: ${actuators[id].state}]`)
   } else {
     

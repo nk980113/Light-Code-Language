@@ -4,6 +4,7 @@ let actuator = {
   id: workerData.actuatorId,
   settings: workerData.settings,
   code: workerData.code,
+  path: workerData.path,
   chunks: {},
   executiveData: {
     tasks: [],
@@ -43,7 +44,7 @@ async function sendMessage (content, waitReturn) {
 }
 
 (async () => {
-  await sendMessage({ type: 'event', name: 'stateChange', value: 'compiling' })
+  await sendMessage({ type: 'event', name: 'stateChange', value: 'analyzing' })
   actuatorLog('running', `正在編譯 (${actuator.code.length} 字)`)
   let startTime = performance.now()
   let complexTypes = analysis(actuator.code)
@@ -53,6 +54,7 @@ async function sendMessage (content, waitReturn) {
       id: 'main',
       name: '全局',
       type: 'chunk', //chunk, childChunk
+      path: actuator.path,
       layer: '0,0', //層, 編號
       state: 'running', //wait, waitAsync
       executiveData: {
@@ -62,7 +64,7 @@ async function sendMessage (content, waitReturn) {
         data: {}
       },
       containers: {
-        輸出: { type: 'function', value: { type: 'directTo', value: '{外部函數}' } }
+        輸出: { type: 'externalFunction', value: '[外部函數: 輸出]' }
       },
       complexTypes,
       directTo: undefined,
@@ -70,6 +72,7 @@ async function sendMessage (content, waitReturn) {
       returnData: { type: 'none', value: '無' },
     }
     checkVMemory()
+    await sendMessage({ type: 'event', name: 'stateChange', value: 'running' })
     executeLoop()
   } else {
     await sendMessage({ type: 'event', name: 'stateChange', value: 'idle' })
@@ -112,6 +115,7 @@ function addAndRunChunk (upperChunk, line, wait, complexTypes, name, type) {
     id: chunkId,
     name,
     type,
+    path: upperChunk.path,
     layer: getLayer(upperChunk.layer.split(',')[0]),
     state: 'running',
     executiveData: {
