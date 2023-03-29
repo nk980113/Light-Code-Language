@@ -33,7 +33,18 @@ function analysisSimpleTypes (code) {
       state = {}
       simpleTypes.push({ type: code[run], line, layer, start: run, end: run })
     } else if (state.nowType === undefined) {
-      if (code[run] === "'" || code[run] === '"') {
+      if (builtInFunctions.includes(code.substring(run, run+4))) {
+        simpleTypes.push({ type: 'builtInFunction', value: code.substring(run, run+4), line, layer, start: run, end: run+1 })
+        run+=3
+      } else if (builtInFunctions.includes(code.substring(run, run+3))) {
+        simpleTypes.push({ type: 'builtInFunction', value: code.substring(run, run+3), line, layer, start: run, end: run+1 })
+        run+=2
+      } else if (builtInFunctions.includes(code.substring(run, run+2))) {
+        simpleTypes.push({ type: 'builtInFunction', value: code.substring(run, run+2), line, layer, start: run, end: run+1 })
+        run+=1
+      } else if (builtInFunctions.includes(code[run])) {
+        simpleTypes.push({ type: 'builtInFunction', value: code[run], line, layer, start: run, end: run+1 })
+      } else if (code[run] === "'" || code[run] === '"') {
         state = { nowType: 'string', startLine: line, startLetter: code[run], value: '', start: run }
       } else if (+code[run] === +code[run]) {
         state = { nowType: 'number', value: code[run], start: run }
@@ -53,17 +64,6 @@ function analysisSimpleTypes (code) {
         run+=1
       } else if (code[run] === '.') {
         state = { nowType: 'key', value: '', start: run }
-      } else if (builtInFunctions.includes(code[run])) {
-        simpleTypes.push({ type: 'builtInFunction', value: code[run], line, layer, start: run, end: run+1 })
-      } else if (builtInFunctions.includes(code.substring(run, run+2))) {
-        simpleTypes.push({ type: 'builtInFunction', value: code.substring(run, run+2), line, layer, start: run, end: run+1 })
-        run+=1
-      } else if (builtInFunctions.includes(code.substring(run, run+3))) {
-        simpleTypes.push({ type: 'builtInFunction', value: '異同步', line, layer, start: run, end: run+1 })
-        run+=2
-      } else if (builtInFunctions.includes(code.substring(run, run+4))) {
-        simpleTypes.push({ type: 'builtInFunction', value: '否則如果', line, layer, start: run, end: run+1 })
-        run+=3
       } else {
         state = { nowType: 'container', value: code[run], start: run }
       }

@@ -111,17 +111,6 @@ function executeBuiltInFunction (chunk, complexType) {
       return true
     } else {
       chunkOut(chunk, true)
-      return
-      if (complexType === undefined) {
-        if (chunk.directTo !== undefined && actuator.chunks[chunk.directTo[0].id].state === `wait-${chunk.id}`) {
-          actuator.chunks[chunk.directTo[0].id].returnedData = chunk.returnedData
-          actuator.chunks[chunk.directTo[0].id].state = 'running'
-        }
-        if (chunk.id === 'main') actuator.returnData = chunk.returnData
-        delete actuator.chunks[chunk.id]
-        removeTesk(chunk.id)
-        return
-      }
     } 
   } else if (complexType.value === '重複') {
     if (chunk.executiveData.data.condition === undefined) {
@@ -164,20 +153,68 @@ function executeBuiltInFunction (chunk, complexType) {
         }
       }
     }
+  } else if (complexType.value === '如果') {
+    if (chunk.executiveData.data.conditions === undefined) {
+      chunk.executiveData.data = { conditions: [{ type: 'if', parameters: chunk.complexTypes[chunk.executiveData.row+1], chunk: chunk.complexTypes[chunk.executiveData.row+2] }], state: 'runParameters', count: 1 }
+      chunk.executiveData.skip = 2
+      for (let run = chunk.executiveData.row+3; run < chunk.complexTypes.length; run++) {
+       if (chunk.complexTypes[run].type === 'builtInFunction' && chunk.complexTypes[run].value === '否則' && chunk.complexTypes[run+1].type === 'chunk') {
+          chunk.executiveData.data.conditions.push({ type: 'else', chunk: chunk.complexTypes[run+2] })
+          chunk.executiveData.skip+=1
+          run+=1
+        } else if (chunk.complexTypes[run].type === 'builtInFunction' && chunk.complexTypes[run].value === '否則如果' && chunk.complexTypes[run+1].type === 'parameters' && chunk.complexTypes[run+2].type === 'chunk') {
+          chunk.executiveData.data.conditions.push({ type: 'elseif', parameters: chunk.complexTypes[run+1], chunk: chunk.complexTypes[run+2] })
+          chunk.executiveData.skip+=2
+          run+=2
+        } else {
+          break
+        }
+      }
+      addAndRunChunk(chunk, complexType.line, true, [chunk.executiveData.data.conditions[0].parameters], chunk.name, 'childChunk')
+      return true
+    } else {
+      if (chunk.executiveData.data.state === 'runParameters') {
+        if (chunk.returnedData.type === 'boolean' && chunk.returnedData.value === '是') {
+          chunk.executiveData.data.state = 'runChunk'
+          addAndRunChunk(chunk, complexType.line, true, chunk.executiveData.data.conditions[chunk.executiveData.data.count].chunk.complexTypes, chunk.name, 'childChunk')
+          return true
+        } else {
+          chunk.executiveData.data.count++
+          if (chunk.executiveData.data.count < chunk.executiveData.data.conditions) {
+            if (chunk.executiveData.data.conditions[chunk.executiveData.data.count].type === 'elseif') {
+              chunk.executiveData.data.state = 'runParameters'
+              addAndRunChunk(chunk, complexType.line, true, [chunk.executiveData.data.conditions[chunk.executiveData.data.count].parameters], chunk.name, 'childChunk')
+              return true
+            } else {
+              chunk.executiveData.data.state = 'runChunk'
+              addAndRunChunk(chunk, complexType.line, true, chunk.executiveData.data.conditions[chunk.executiveData.data.count].chunk.complexTypes, chunk.name, 'childChunk')
+              return true
+            }
+          } else {
+            chunk.returnedData = undefined
+            chunk.executiveData.data = {}
+            chunk.executiveData.row += chunk.executiveData.skip
+          }
+        }
+      } else if (chunk.executiveData.data.state === 'runChunk') {
+        chunk.returnedData = undefined
+        chunk.executiveData.data = {}
+        chunk.executiveData.row += chunk.executiveData.skip
+      }
+    }
   }
 }
 
 //退出區塊
 function chunkOut (chunk, first) {
   if (chunk.type === 'chunk') {
-    if (actuator.chunks[chunk.directTo[0].id].state === `wait-${chunk.id}`) {
+    if (chunk.id === 'main') {
+      actuator.returnData = (first) ? chunk.returnedData : { type: 'none', value: '無' }
+    } else if (actuator.chunks[chunk.directTo[0].id].state === `wait-${chunk.id}`) {
       console.log(chunk.returnedData)
       actuator.chunks[chunk.directTo[0].id].returnData = (first && chunk.returnedData !== undefined) ? chunk.returnedData : { type: 'none', value: '無' }
       actuator.chunks[chunk.directTo[0].id].executiveData.row = Infinity
       actuator.chunks[chunk.directTo[0].id].state = 'running'
-      // if (chunk.directTo[0].id === 'main') actuator.returnData = (first && chunk.returnedData !== undefined) ? chunk.returnedData : { type: 'none', value: '無' }
-      // actuator.chunks[chunk.directTo[0].id].returnedData = (first && chunk.returnedData !== undefined) ? chunk.returnedData : { type: 'none', value: '無' }
-      // actuator.chunks[chunk.directTo[0].id].state = 'running'
     }
     delete actuator.chunks[chunk.id]
     removeTesk(chunk.id)

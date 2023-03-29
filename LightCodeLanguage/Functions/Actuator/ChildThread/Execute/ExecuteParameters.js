@@ -5,9 +5,19 @@ const { throwError } = require('../ExecuteLoop')
 const analysis = require('../../../Analysis/Analysis')
 
 const getContainer = require('../Get/GetContainer')
+const executeExternalFunction = require('./ExecuteExternalFunction')
 
 //執行參數列
 function executeParameters (chunk, complexType) {
+  if (chunk.executiveData.data.runningFunction === undefined) {
+    if (chunk.returnedData === undefined) {
+      chunk.executiveData.data = { count: 0, parameters: [], returnedData: undefined }
+      addAndRunChunk(chunk, complexType.line, true, complexType.value[0], chunk.name, 'normal')
+      return true
+    } else {
+      
+    }
+  }
   if (chunk.executiveData.data.runningFunction === undefined) {
     if (chunk.returnedData === undefined) {
       chunk.executiveData.data = { count: 0, parameters: [], returnedData: undefined }
@@ -48,9 +58,11 @@ function executeParameters (chunk, complexType) {
             }
             chunk.executiveData.data.runningFunction = true
             return true
+          } else if (chunk.returnData.type === 'externalFunction') {
+            executeExternalFunction(chunk, chunk.returnData, chunk.returnedData)
           } else {
             if (chunk.returnData.container === undefined) {
-              throwError(chunk, { error: true, content: `多出了一個 <餐數列>`, start: complexType.start, end: complexType.end, path: [{ func: (chunk.name === '全局') ? undefined : chunk.name, line: complexType.line }]})
+              throwError(chunk, { error: true, content: `多出了一個 <參數列>`, start: complexType.start, end: complexType.end, path: [{ func: (chunk.name === '全局') ? undefined : chunk.name, line: complexType.line }]})
             } else {
               throwError(chunk, { error: true, content: `容器 ${chunk.returnData.container} 不是一個 <函數>`, start: complexType.start, end: complexType.end, path: [{ func: (chunk.name === '全局') ? undefined : chunk.name, line: complexType.line }]})
             }
