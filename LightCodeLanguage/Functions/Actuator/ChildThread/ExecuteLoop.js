@@ -2,7 +2,7 @@ module.exports = { executeLoop, arrangeTasks, addTask, removeTesk, throwError }
 
 const { addInterval } = require('../../Tools/Timer')
 
-const { actuator, sendMessage } = require('./Actuator')
+const { actuator, sendMessage, stopActuator } = require('./Actuator')
 const actuatorLog = require('./ActuatorLog')
 const checkVMemory = require('./VMemoryManager')
 
@@ -115,5 +115,5 @@ function throwError (chunk, errorData) {
     chunk.directTo.map((item) => errorData.path.push({ func: item.name, line: item.line }))
     sendMessage({ type: 'executionStop', data: errorData })
   }
-  process.exit()
+  stopActuator()
 }

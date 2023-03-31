@@ -15,19 +15,10 @@ function executeParameters (chunk, complexType) {
       addAndRunChunk(chunk, complexType.line, true, complexType.value[0], chunk.name, 'normal')
       return true
     } else {
-      
-    }
-  }
-  if (chunk.executiveData.data.runningFunction === undefined) {
-    if (chunk.returnedData === undefined) {
-      chunk.executiveData.data = { count: 0, parameters: [], returnedData: undefined }
-      addAndRunChunk(chunk, complexType.line, true, complexType.value[0], chunk.name, 'normal')
-      return true
-    } else {
       chunk.executiveData.data.parameters.push(chunk.returnedData)
       chunk.executiveData.data.count++
       if (chunk.executiveData.data.count < complexType.value.length) {
-        addAndRunChunk(chunk, complexType.line, true, complexType.value[chunk.executiveData.data.count], chunk.name, 'normal')
+        addAndRunChunk(chunk, complexType.line, true, complexType.value[chunk.executiveData.data.count], chunk.name, 'childChunk')
         return true
       } else {
         if (chunk.complexTypes[chunk.executiveData.row-1] === undefined) {
@@ -59,7 +50,7 @@ function executeParameters (chunk, complexType) {
             chunk.executiveData.data.runningFunction = true
             return true
           } else if (chunk.returnData.type === 'externalFunction') {
-            executeExternalFunction(chunk, chunk.returnData, chunk.returnedData)
+            executeExternalFunction(chunk, chunk.returnData, chunk.executiveData.data.parameters)
           } else {
             if (chunk.returnData.container === undefined) {
               throwError(chunk, { error: true, content: `多出了一個 <參數列>`, start: complexType.start, end: complexType.end, path: [{ func: (chunk.name === '全局') ? undefined : chunk.name, line: complexType.line }]})
