@@ -4,7 +4,7 @@ let actuator = {
   id: workerData.actuatorId,
   settings: workerData.settings,
   code: workerData.code,
-  path: workerData.path,
+  mainFilePath: workerData.mainFilePath,
   chunks: {},
   executiveData: {
     tasks: [],
@@ -13,7 +13,7 @@ let actuator = {
   returnData: undefined,
 }
 
-module.exports = { actuator, sendMessage, addAndRunChunk }
+module.exports = { actuator, sendMessage, addAndRunChunk, stopActuator }
 
 const generateID = require('../../Tools/GenerateID')
 
@@ -22,6 +22,7 @@ const logError = require('./LogError')
 const analysis = require('../../Analysis/Analysis')
 const { addTask, executeLoop } = require('./ExecuteLoop')
 const checkVMemory = require('./VMemoryManager')
+const { checkPlugins } = require('./Plugin')
 const log = require('./Log')
 
 let messages = {}
@@ -31,6 +32,12 @@ parentPort.addListener('message', (msg) => {
     delete messages[msg.messageId]
   }
 })
+
+//停止執行器
+async function stopActuator () {
+  await sendMessage({ type: 'event', name: 'stateChange', value: 'idle' })
+  process.exit()
+}
 
 //發送訊息
 async function sendMessage (content, waitReturn) {
@@ -45,16 +52,16 @@ async function sendMessage (content, waitReturn) {
 
 (async () => {
   await sendMessage({ type: 'event', name: 'stateChange', value: 'analyzing' })
-  actuatorLog('running', `正在編譯 (${actuator.code.length} 字)`)
+  actuatorLog('running', `正在分析 (${actuator.code.length} 字)`)
   let startTime = performance.now()
   let complexTypes = analysis(actuator.code)
   if (Array.isArray(complexTypes)) {
-    await actuatorLog('complete', `編譯完成 (花費 ${Math.round(performance.now()-startTime)}ms)`)
+    await actuatorLog('complete', `分析完成 (花費 ${Math.round(performance.now()-startTime)}ms)`)
     actuator.chunks.main = {
       id: 'main',
       name: '全局',
       type: 'chunk', //chunk, childChunk
-      path: actuator.path,
+      path: actuator.mainFilePath,
       layer: '0,0', //層, 編號
       state: 'running', //wait, waitAsync
       executiveData: {
@@ -64,7 +71,7 @@ async function sendMessage (content, waitReturn) {
         data: {}
       },
       containers: {
-        輸出: { type: 'externalFunction', value: '[外部函數: 輸出]' }
+        輸出: { type: 'externalFunction', value: '[外部函數: 輸出]', async: false }
       },
       complexTypes,
       directTo: undefined,
@@ -72,13 +79,14 @@ async function sendMessage (content, waitReturn) {
       returnData: { type: 'none', value: '無' },
     }
     checkVMemory()
+    actuatorLog('running', '正在檢查插件')
+    actuatorLog('complete', `檢查完成 (插件: [${await checkPlugins(actuator.mainFilePath)}])`)
     await sendMessage({ type: 'event', name: 'stateChange', value: 'running' })
     executeLoop()
   } else {
-    await sendMessage({ type: 'event', name: 'stateChange', value: 'idle' })
     actuatorLog('error', `編譯時拋出錯誤 (花費 ${Math.round(performance.now()-startTime)}ms)`)
     logError(complexTypes)
-    process.exit()
+    stopActuator()
   }
 })()
 

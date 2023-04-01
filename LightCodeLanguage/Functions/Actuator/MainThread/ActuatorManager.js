@@ -69,7 +69,7 @@ async function runActuator (id) {
           resolve(data)
         }
       }
-      actuators[id].worker = new Worker(getPath(__dirname, ['<', 'ChildThread', 'Actuator.js']), { workerData: { actuatorId: id, settings: actuators[id].settings, code: actuators[id].code, path: actuators[id].path }}) 
+      actuators[id].worker = new Worker(getPath(__dirname, ['<', 'ChildThread', 'Actuator.js']), { workerData: { actuatorId: id, settings: actuators[id].settings, code: actuators[id].code, mainFilePath: actuators[id].mainFilePath }}) 
       actuators[id].worker.addListener('message', listenMessage)
     }
   })
