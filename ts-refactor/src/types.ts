@@ -1,3 +1,5 @@
+import { DebugLogLevel } from './utils/logger.js';
+
 export type WorkerMessage =
     | StopMessage
     | EventMessage
@@ -31,7 +33,7 @@ type LogMessage = {
 type DebugMessage = {
     type: MessageType.Debug;
     content: string;
-    level: string;
+    level: DebugLogLevel;
 }
 
 export enum MessageType {

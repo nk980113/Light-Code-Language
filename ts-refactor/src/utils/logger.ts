@@ -1,6 +1,16 @@
 import z from './z.js';
 import chalk from 'chalk';
 
+export enum DebugLogLevel {
+    Analyze = 'analyze',
+    Error = 'error',
+    Exit = 'exit',
+    Info = 'info',
+    Warn = 'warn',
+}
+
+function noop() {}
+
 export default class Logger {
     static prefix = chalk.blue('LCL ');
     static errorPrefix = chalk.red('ERR ');
@@ -8,8 +18,18 @@ export default class Logger {
         const newContent = typeof content === 'string' ? content.split('\n') : content;
         return newContent.map((v) => `${prefix}${v}`).join('\n');
     }
-    
+    static levelToStrMap: { [level in DebugLogLevel]: string } = {
+        [DebugLogLevel.Analyze]: chalk.blue('ANALYZE'),
+        [DebugLogLevel.Error]: chalk.red('ERR'),
+        [DebugLogLevel.Exit]: chalk.green('EXIT'),
+        [DebugLogLevel.Info]: chalk.blue('INFO'),
+        [DebugLogLevel.Warn]: chalk.yellow('WARN'),
+    };
+
     config: OutputConfig;
+    debug: (level: DebugLogLevel, content: string) => void;
+    info: (content: string) => void;
+    // TODO: implement the save log part
 
     constructor({
         logToConsole,
@@ -23,14 +43,24 @@ export default class Logger {
             interpreterLog,
             detailedError,
         };
+        if (logToConsole) {
+            this.debug = function debug(level, content) {
+                console.log(Logger.makeContent(`${Logger.prefix}Debug ${Logger.levelToStrMap[level]}`, content));
+            }
+            // TODO: check if this is for executing code
+            this.info = function info(content) {
+                console.log(content);
+            }
+        } else {
+            this.debug = noop;
+            this.info = noop;
+        }
     }
 
     log: string[] = [];
 
     error(position: string, content: string) {
-        console.error(
-            Logger.makeContent(`${Logger.prefix}${position} ${Logger.errorPrefix}`, content)
-        );
+        console.error(Logger.makeContent(`${Logger.prefix}${position} ${Logger.errorPrefix}`, content));
         process.exit(1);
     }
 

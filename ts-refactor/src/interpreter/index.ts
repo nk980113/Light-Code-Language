@@ -145,7 +145,13 @@ class InternalInterpreter {
                 }
                 break;
             }
-            // TODO: implement others
+            case MessageType.Debug: {
+                this.logger.debug(message.level, message.content)
+                break;
+            }
+            case MessageType.Log: {
+                this.logger.info(message.content);
+            }
         }
     }
 }
