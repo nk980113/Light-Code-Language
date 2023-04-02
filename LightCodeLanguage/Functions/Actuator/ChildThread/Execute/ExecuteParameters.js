@@ -1,14 +1,12 @@
-module.exports = executeParameters
+import { addAndRunChunk } from '../Actuator.js'
+import { throwError } from '../ExecuteLoop.js'
+import analysis from '../../../Analysis/Analysis.js'
 
-const { actuator, addAndRunChunk } = require('../Actuator')
-const { throwError } = require('../ExecuteLoop')
-const analysis = require('../../../Analysis/Analysis')
-
-const getContainer = require('../Get/GetContainer')
-const executeExternalFunction = require('./ExecuteExternalFunction')
+import getContainer from '../Get/GetContainer.js'
+import executeExternalFunction from './ExecuteExternalFunction.js'
 
 //執行參數列
-function executeParameters (chunk, complexType) {
+export default function executeParameters (chunk, complexType) {
   if (chunk.executiveData.data.runningFunction === undefined) {
     if (chunk.returnedData === undefined) {
       chunk.executiveData.data = { count: 0, parameters: [], returnedData: undefined }

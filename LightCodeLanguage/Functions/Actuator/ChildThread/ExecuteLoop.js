@@ -1,21 +1,21 @@
-module.exports = { executeLoop, arrangeTasks, addTask, removeTesk, throwError }
+export { executeLoop, arrangeTasks, addTask, removeTesk, throwError }
 
-const { addInterval } = require('../../Tools/Timer')
+import { addInterval } from '../../Tools/Timer.js'
 
-const { actuator, sendMessage, stopActuator } = require('./Actuator')
-const actuatorLog = require('./ActuatorLog')
-const checkVMemory = require('./VMemoryManager')
+import { actuator, sendMessage, stopActuator } from './Actuator.js'
+import actuatorLog from './ActuatorLog.js'
+import checkVMemory from './VMemoryManager.js'
 
-const getContainer = require('./Get/GetContainer')
-const getArray = require('./Get/GetArray')
-const getObject = require('./Get/GetObject')
-const getExpressions = require('./Get/GetExpressions')
+import getContainer from './Get/GetContainer.js'
+import getArray from './Get/GetArray.js'
+import getObject from './Get/GetObject.js'
+import getExpressions from './Get/GetExpressions.js'
 
-const executeOperators = require('./Execute/ExecuteOperators')
-const executeBuiltInFunction = require('./Execute/ExecuteBuiltInFunction')
-const executeParameters = require('./Execute/ExecuteParameters')
-const executeKey = require('./Execute/ExecuteKey')
-const executeIndex = require('./Execute/ExecuteIndex')
+import executeOperators from './Execute/ExecuteOperators.js'
+import executeBuiltInFunction from './Execute/ExecuteBuiltInFunction.js'
+import executeParameters from './Execute/ExecuteParameters.js'
+import executeKey from './Execute/ExecuteKey.js'
+import executeIndex from './Execute/ExecuteIndex.js'
 
 //安排任務
 function arrangeTasks () {

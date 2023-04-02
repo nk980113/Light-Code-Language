@@ -1,7 +1,5 @@
-module.exports = getVariableSize
-
 //取得變數的大小
-function getVariableSize (data) {
+export default function getVariableSize (data) {
   let bytes = 0
   if (typeof data === 'string') bytes+=Buffer.byteLength(data, 'utf8')
   if (typeof data === 'number') bytes+=8

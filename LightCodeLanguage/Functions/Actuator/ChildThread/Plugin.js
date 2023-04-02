@@ -1,11 +1,11 @@
-const fs = require('fs')
+import fs from 'node:fs'
 
-module.exports = { checkPlugins }
+export { checkPlugins }
 
-const getPath = require('../../Tools/Path')
+import getPath from '../../Tools/GetPath.js'
 
-const { stopActuator } = require('./Actuator')
-const log = require('./Log')
+import { stopActuator } from './Actuator.js'
+import log from './Log.js'
 
 //資料的值的類型錯誤
 function infoValueTypeWrong (name, valueName, type) {

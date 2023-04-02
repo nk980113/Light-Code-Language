@@ -1,7 +1,5 @@
-module.exports = executeKey
-
 //執行鑰
-function executeKey (chunk, complexType) {
+export default function executeKey (chunk, complexType) {
   if (chunk.returnData.type === 'object') {
     let allKey = complexType.value.split('.')
     let container2 = chunk.returnData.value[allKey[0]]

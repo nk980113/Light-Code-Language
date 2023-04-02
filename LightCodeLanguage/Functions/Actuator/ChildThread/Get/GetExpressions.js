@@ -1,9 +1,7 @@
-module.exports = getExpressions
+import { addAndRunChunk } from '../Actuator.js'
+import { throwError } from '../ExecuteLoop.js'
 
-const { addAndRunChunk } = require('../Actuator')
-const { throwError } = require('../ExecuteLoop')
-
-const getContainer = require('./GetContainer')
+import getContainer from './GetContainer.js'
 
 //取得運算值
 function getExpressionsValue (chunk, complexType) {
@@ -28,7 +26,7 @@ function getExpressionsValue (chunk, complexType) {
 }
 
 //取得運算式
-function getExpressions (chunk, complexType) {
+export default function getExpressions (chunk, complexType) {
   if (chunk.returnedData === undefined) {
     chunk.executiveData.data = { count: 0, expressions: [] }
     for (let run = 0; run < complexType.value.length; run++) {

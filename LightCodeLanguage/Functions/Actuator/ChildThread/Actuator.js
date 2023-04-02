@@ -1,4 +1,4 @@
-const { parentPort, workerData } = require('worker_threads')
+import { parentPort, workerData } from 'node:worker_threads'
 
 let actuator = {
   id: workerData.actuatorId,
@@ -13,17 +13,17 @@ let actuator = {
   returnData: undefined,
 }
 
-module.exports = { actuator, sendMessage, addAndRunChunk, stopActuator }
+export { actuator, sendMessage, addAndRunChunk, stopActuator }
 
-const generateID = require('../../Tools/GenerateID')
+import generateID from '../../Tools/GenerateID.js'
 
-const actuatorLog = require('./ActuatorLog')
-const logError = require('./LogError')
-const analysis = require('../../Analysis/Analysis')
-const { addTask, executeLoop } = require('./ExecuteLoop')
-const checkVMemory = require('./VMemoryManager')
-const { checkPlugins } = require('./Plugin')
-const log = require('./Log')
+import actuatorLog from './ActuatorLog.js'
+import logError from './LogError.js'
+import analysis from '../../Analysis/Analysis.js'
+import { addTask, executeLoop } from './ExecuteLoop.js'
+import checkVMemory from './VMemoryManager.js'
+import { checkPlugins } from './Plugin.js'
+import log from './Log.js'
 
 let messages = {}
 parentPort.addListener('message', (msg) => {

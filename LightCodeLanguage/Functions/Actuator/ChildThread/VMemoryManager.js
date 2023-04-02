@@ -1,10 +1,8 @@
-module.exports = checkVMemory
+import getVariableSize from '../../Tools/GetVariableSize.js'
 
-const getVariableSize = require('../../Tools/GetVariableSize')
-
-const { actuator, sendMessage } = require('./Actuator')
-const actuatorLog = require('./ActuatorLog')
-const log = require('./Log')
+import { actuator, sendMessage } from './Actuator.js'
+import actuatorLog from './ActuatorLog.js'
+import log from './Log.js'
 
 //取得數字
 function getNumber (number) {
@@ -20,7 +18,7 @@ function getNumber (number) {
 }
 
 //檢查記憶體
-function checkVMemory () {
+export default function checkVMemory () {
   let actuatorSize = getVariableSize(actuator)
   if (actuatorSize > actuator.settings.vMemCanUsed) {
     let settingsSize = getVariableSize('settings')+getVariableSize(actuator.settings)

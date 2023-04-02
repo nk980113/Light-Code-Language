@@ -1,9 +1,7 @@
-module.exports = log
-
-const { actuators } = require('./ActuatorManager')
+import { actuators } from './ActuatorManager.js'
 
 //日誌
-function log (id, content) {
+export default function log (id, content) {
   if (actuators[id].settings.logToConsole) console.log(content)
   if (actuators[id].settings.saveLog) actuators[id].log.push(content)
 }

@@ -1,9 +1,7 @@
-module.exports = getArray
-
-const { addAndRunChunk } = require('../Actuator')
+import { addAndRunChunk } from '../Actuator.js'
 
 //取得陣列
-function getArray (chunk, complexType) {
+export default function getArray (chunk, complexType) {
   if (chunk.returnedData === undefined) {
     chunk.executiveData.data = { count: 0, array: [] }
     addAndRunChunk(chunk, complexType.line, true, complexType.value[0], chunk.name, 'childChunk')

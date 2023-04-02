@@ -1,9 +1,7 @@
-module.exports = executeIndex
-
-const { addAndRunChunk } = require('../Actuator')
+import { addAndRunChunk } from '../Actuator.js'
 
 //執行索引
-function executeIndex (chunk, complexType) {
+export default function executeIndex (chunk, complexType) {
   if (chunk.returnedData === undefined) {
     chunk.executiveData.data = { count: 0, index: [] }
     addAndRunChunk(chunk, complexType.line, true, complexType.value[0], chunk.name, 'childChunk')

@@ -1,9 +1,7 @@
-module.exports = getObject
-
-const { addAndRunChunk } = require('../Actuator')
+import { addAndRunChunk } from '../Actuator'
 
 //取得物件
-function getObject (chunk, complexType) {
+export default function getObject (chunk, complexType) {
   let allKey = Object.keys(complexType.value)
   if (chunk.returnedData === undefined) {
     chunk.executiveData.data = { count: 0, object: {} }

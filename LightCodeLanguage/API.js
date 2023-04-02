@@ -37,9 +37,9 @@ let JsInterface = class  {
   }
 } 
 
-module.exports = { Actuator }
+export { Actuator }
 
-const { error, checkValues } = require('./Functions/Tools/Error')
-const generateID = require('./Functions/Tools/GenerateID')
+import { error, checkValues } from './Functions/Tools/Error.js'
+import generateID from './Functions/Tools/GenerateID.js'
 
-const { actuators, createActuator, runActuator, stopActuator } = require('./Functions/Actuator/MainThread/ActuatorManager')
+import { actuators, createActuator, runActuator, stopActuator } from './Functions/Actuator/MainThread/ActuatorManager.js'

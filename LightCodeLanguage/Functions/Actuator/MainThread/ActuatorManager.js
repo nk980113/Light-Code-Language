@@ -1,21 +1,22 @@
-const { Worker } = require('worker_threads')
-const fs = require('fs')
-const path = require('path');
+import { Worker } from 'node:worker_threads'
+import fs from 'node:fs'
+import path from 'node:path'
 
 let actuators = {}
 
-module.exports = { actuators, createActuator, runActuator, stopActuator }
+export { actuators, createActuator, runActuator, stopActuator }
 
-const { error } = require('../../Tools/Error')
-const generateID = require('../../Tools/GenerateID')
-const getPath = require('../../Tools/Path')
-const defaultValue = require('../../Tools/DefaultValue')
-const getVariableSize = require('../../Tools/GetVariableSize')
+import { error } from '../../Tools/Error.js'
+import generateID from '../../Tools/GenerateID.js'
+import getPath from '../../Tools/GetPath.js'
+import __dirname from '../../Tools/DirName.js'
+import defaultValue from '../../Tools/DefaultValue.js'
+import getVariableSize from '../../Tools/GetVariableSize.js'
 
-const actuatorLog = require('./ActuatorLog')
-const logError = require('./LogError')
-const log = require('./Log')
-const { defaultSettings, checkSettings } = require('./ActuatorSettings')
+import actuatorLog from './ActuatorLog.js'
+import logError from './LogError.js'
+import log from './Log.js'
+import { defaultSettings, checkSettings } from './ActuatorSettings.js'
 
 //創建執行器
 function createActuator (mainFilePath, settings) {

@@ -1,14 +1,12 @@
-module.exports = executeOperators
+import checkSyntax from '../../../Analysis/CheckSyntax.js'
+import { actuator, addAndRunChunk } from '../Actuator.js'
+import { throwError } from '../ExecuteLoop.js'
 
-const checkSyntax = require('../../../Analysis/CheckSyntax')
-const { actuator, addAndRunChunk } = require('../Actuator')
-const { throwError } = require('../ExecuteLoop')
-
-const typesName = require('../../../TypesName.json')
-const getContainer = require('../Get/GetContainer')
+import typesName from '../../../TypesName.json.js'
+import getContainer from '../Get/GetContainer.js'
 
 //執行運算符
-function executeOperators (chunk, complexType) {
+export default function executeOperators (chunk, complexType) {
   if (chunk.returnedData === undefined) {
     let chunk2 = [chunk.complexTypes[chunk.executiveData.row+1]]
     chunk.executiveData.skip = (chunk.executiveData.row+4)-chunk.executiveData.row

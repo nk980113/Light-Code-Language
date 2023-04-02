@@ -1,6 +1,4 @@
-module.exports = executeExternalFunction
-
-const log = require('../Log')
+import log from '../Log.js'
 
 //取得輸出的內容
 function getLogContent (complexType) {
@@ -16,7 +14,7 @@ function getLogContent (complexType) {
 }
 
 //執行外部函數
-async function executeExternalFunction (chunk, container, parameters) {
+export default async function executeExternalFunction (chunk, container, parameters) {
   if (container.container === '輸出') {
     let content = []
     parameters.map((item) => content.push(getLogContent(item)))
