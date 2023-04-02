@@ -1,12 +1,10 @@
-module.exports = executeBuiltInFunction
-
-const { actuator, addAndRunChunk } = require('../Actuator')
-const { removeTesk, throwError } = require('../ExecuteLoop')
-const checkSyntax = require('../../../Analysis/CheckSyntax')
-const getContainer = require('../Get/GetContainer')
+import { actuator, addAndRunChunk } from '../Actuator.js'
+import { removeTesk, throwError } from '../ExecuteLoop.js'
+import checkSyntax from '../../../Analysis/CheckSyntax.js'
+import getContainer from '../Get/GetContainer.js'
 
 //執行內建函數
-function executeBuiltInFunction (chunk, complexType) {
+export default function executeBuiltInFunction (chunk, complexType) {
   if (complexType.value === '變數') {
     if (chunk.returnedData === undefined) {
       if (chunk.complexTypes[chunk.executiveData.row+1] === undefined) {

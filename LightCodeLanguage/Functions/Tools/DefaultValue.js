@@ -1,6 +1,4 @@
-module.exports = defaultValue
-
-function defaultValue (defaultValue_, newValue) {
+export default function defaultValue (defaultValue_, newValue) {
   if (newValue === undefined) {
     return defaultValue_
   } else {

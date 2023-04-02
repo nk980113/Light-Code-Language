@@ -1,5 +1,3 @@
-module.exports = generateID
-
 const letters = 'ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvxyz12345678901234567890'
 
 //取得隨機數
@@ -15,7 +13,7 @@ function generateAnID (length) {
 }
 
 //生成id
-function generateID (length, allKey) {
+export default function generateID (length, allKey) {
   let string = generateAnID(length)
   while (allKey.includes(string)) string = generateAnID(length)
   return string

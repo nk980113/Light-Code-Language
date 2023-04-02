@@ -1,23 +1,22 @@
-module.exports = {
-  defaultSettings: {
-    //效能設定
-    cpe: 100, //Chunk Per Execution
-    vMemCanUsed: Infinity, //Virtual Memory Can Used
-    interval: 1,
-    maxChunks: Infinity,
-    maxCallLength: 100,
-    //輸出設定
-    logToConsole: true,
-    saveLog: false,
-    actuatorLog: false,
-    detailedError: false,
-    //其他設定
-    vDiskPath: ''
-  },
-  checkSettings
+const defaultSettings = {
+   //效能設定
+   cpe: 100, //Chunk Per Execution
+   vMemCanUsed: Infinity, //Virtual Memory Can Used
+   interval: 1,
+   maxChunks: Infinity,
+   maxCallLength: 100,
+   //輸出設定
+   logToConsole: true,
+   saveLog: false,
+   actuatorLog: false,
+   detailedError: false,
+   //其他設定
+   vDiskPath: ''
 }
 
-const { error, checkObjectValues } = require("../../Tools/Error")
+export { defaultSettings, checkSettings }
+
+import { error, checkObjectValues } from '../../Tools/Error.js'
 
 //檢查設定
 function checkSettings (settings) {

@@ -1,8 +1,6 @@
-module.exports = log
-
-const { sendMessage } = require('./Actuator')
+import { sendMessage } from './Actuator.js'
 
 //日誌
-function log (content) {
+export default function log (content) {
   sendMessage({ type: 'log', content }, false)
 }

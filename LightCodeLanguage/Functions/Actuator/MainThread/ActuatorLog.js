@@ -1,9 +1,7 @@
-module.exports = actuatorLog
-
-const { actuators } = require('./ActuatorManager')
+import { actuators } from './ActuatorManager.js'
 
 //執行器日誌
-function actuatorLog (id, type, content) {
+export default function actuatorLog (id, type, content) {
   if (actuators[id].settings.actuatorLog) {
     let logContent
     if (type === 'running') logContent = `[運行]: ${content}`

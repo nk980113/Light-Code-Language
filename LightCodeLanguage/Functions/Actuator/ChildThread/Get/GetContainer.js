@@ -1,8 +1,4 @@
-module.exports = getContainer
-
-const { actuator } = require('../Actuator')
-
-const builtInFunction = ['變數', '的', '']
+import { actuator } from '../Actuator.js'
 
 //取得區塊的容器
 function getChunkContainer (chunkId, name) {
@@ -19,7 +15,7 @@ function getChunkContainer (chunkId, name) {
 }
 
 //取得容器
-function getContainer (layer, name) {
+export default function getContainer (layer, name) {
   let allKey = Object.keys(actuator.chunks)
   for (let run = 0; run < allKey.length; run++) {
     if ((actuator.chunks[allKey[run]].layer === layer) || (+actuator.chunks[allKey[run]].layer.split(',')[0] < +layer.split(',')[0])) {

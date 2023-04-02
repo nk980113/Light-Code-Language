@@ -1,4 +1,4 @@
-module.exports = { addInterval, changeIntervalInterval,removeInterval }
+export { addInterval, changeIntervalInterval,removeInterval }
 
 const generateID = require('./GenerateID')
 

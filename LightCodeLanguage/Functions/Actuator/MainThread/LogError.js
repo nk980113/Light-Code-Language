@@ -1,10 +1,8 @@
-module.exports = logError
-
-const { actuators } = require('./ActuatorManager')
-const log = require('./Log')
+import { actuators } from './ActuatorManager.js'
+import log from './Log.js'
 
 //輸出錯誤
-function logError (id, errorData) {
+export default function logError (id, errorData) {
   let path = ''
   errorData.path.map((item, row) => {
     if (row === 0) path+=`${getPathText(item.func, item.line)}\n`

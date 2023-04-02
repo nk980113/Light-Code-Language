@@ -1,4 +1,4 @@
-module.exports = { error, checkValues, checkObjectValues }
+export { error, checkValues, checkObjectValues }
 
 //報錯
 function error (type, content) {
