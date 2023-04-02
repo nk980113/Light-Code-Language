@@ -46,13 +46,13 @@ type Event =
 
 type StateChangeEvent = {
     name: EventType.StateChange;
-    value: Status.Compiling | Status.Running;
+    value: Status.Analyzing | Status.Running;
 }
 
 export enum Status {
     Idle = 'idle',
     Pending = 'pending',
-    Compiling = 'compiling',
+    Analyzing = 'analyzing',
     Running = 'running',
 }
 

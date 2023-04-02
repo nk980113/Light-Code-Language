@@ -1,13 +1,14 @@
 import { readFile, stat } from 'node:fs/promises';
+import type { Stats } from 'node:fs';
 import { extname, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { inspect } from 'node:util';
 import { Worker } from 'node:worker_threads';
 import EventEmitter from 'node:events';
-import TypedEmitterNamespace from 'typed-emitter';
+import type TypedEmitterNamespace from 'typed-emitter';
 import autoBind from 'auto-bind';
 import { EventType, MessageType, Status, WorkerMessage } from '../types.js';
-import { outputConfigValidator, OutputConfig } from '../utils/logger.js';
+import { outputConfigValidator } from '../utils/logger.js';
 import z, { wrapZodError } from '../utils/z.js';
 import Logger from '../utils/logger.js';
 import randomId from '../utils/random.js';
@@ -17,8 +18,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 type TypedEmitter<T extends TypedEmitterNamespace.EventMap> = TypedEmitterNamespace.default<T>
 
 export class Interpreter {
-    static async create(filePath: string, config: InterpreterConfig = {}) {
-        const { id, instance } = await InternalInterpreter.create(filePath, config);
+    static async create(mainFilePath: string, config: InterpreterConfig = {}) {
+        const { id, instance } = await InternalInterpreter.create(mainFilePath, config);
         return new Interpreter(id, instance);
     }
 
@@ -51,7 +52,7 @@ class InternalInterpreter {
     listener: TypedEmitter<InternalInterpreterEventsMap>;
     state: InternalInterpreterState;
 
-    static async create(filePath: string, config: InterpreterConfig): Promise<{ id: string; instance: InternalInterpreter; }> {
+    static async create(mainFilePath: string, config: InterpreterConfig): Promise<{ id: string; instance: InternalInterpreter; }> {
         const parseConfigResult = wrapZodError(configValidator, config, 'config');
         
         if (!parseConfigResult.success) {
@@ -63,25 +64,31 @@ class InternalInterpreter {
         const logger = new Logger(parseConfigResult.data);
 
         try {
-            if (!(await stat(filePath)).isFile()) {
-                throw new Error(`找不到檔案 ${filePath}`);
+            let fileStat: Stats;
+            try {
+                fileStat = await stat(mainFilePath);
+            } catch (e) {
+                throw new Error(`找不到檔案 ${mainFilePath}`, { cause: e });
+            }
+            if (!fileStat.isFile()) {
+                throw new Error(`找不到檔案 ${mainFilePath}`);
             }
 
-            if (extname(filePath) !== '.lcl') {
+            if (extname(mainFilePath) !== '.lcl') {
                 throw new Error('文件的副檔名必須為 .lcl');
             }
         } catch (err) {
             logger.error('Interpreter Create', inspect(err));
         }
 
-        const content = await readFile(filePath, { encoding: 'utf-8' });
-        const instance = new InternalInterpreter(filePath, content, config, logger);
+        const content = await readFile(mainFilePath, { encoding: 'utf-8' });
+        const instance = new InternalInterpreter(mainFilePath, content, config, logger);
         const id = randomId(5, Object.keys(this.instances))
         return { id, instance };
     }
 
     private constructor(
-        public filePath: string,
+        public mainFilePath: string,
         public content: string,
         public config: InterpreterConfig,
         public logger: Logger,

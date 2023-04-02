@@ -8,7 +8,7 @@ function sendMessage(message: WorkerMessage) {
 }
 
 async function test() {
-    sendMessage({ type: MessageType.Event, event: { name: EventType.StateChange, value: Status.Compiling } });
+    sendMessage({ type: MessageType.Event, event: { name: EventType.StateChange, value: Status.Analyzing } });
     await setTimeout(3_000);
     sendMessage({ type: MessageType.Event, event: { name: EventType.StateChange, value: Status.Running } });
     await setTimeout(3_000);

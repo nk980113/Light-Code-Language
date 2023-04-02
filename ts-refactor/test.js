@@ -1,4 +1,4 @@
-import { Interpreter } from './dist/';
+import { Interpreter } from '.';
 const interpreter = await Interpreter.create('test.lcl');
 interpreter.on('stateChange', (status) => {
     console.log(`目前狀態：${status}`);
