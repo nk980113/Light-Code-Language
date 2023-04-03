@@ -2,11 +2,6 @@
 一個虛擬編程語言，他的語法是中文的且類似於Javascipt。
 
 ## 介紹
-LCL(Light Code Language) 是一個中文的虛擬編程語言，他是由Javascript編寫的，可以簡單的跟Javascript做交互。
+Light Code Language(LCL)是由LmanTW用javascript編寫的虛擬程式語言，他的語法是中文的，且類似javascript。LCL分為幾個版本，CLI版 與 API版，你可以透過API版來用js(ES6)啟動一個"執行器"來運行LCL，使用API版可以更詳細的控制設定。
 
-## 目錄
-
-* [安裝](Guide/Install.md)
-* [入門](Guide/GettingStarted.md)
-
-* [LCL的運作方式]()
+這裡是LCL的Github庫，你可以在這邊回報錯誤。
