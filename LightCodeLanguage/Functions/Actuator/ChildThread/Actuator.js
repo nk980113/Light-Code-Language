@@ -80,7 +80,9 @@ async function sendMessage (content, waitReturn) {
     }
     checkVMemory()
     actuatorLog('running', '正在檢查插件')
-    actuatorLog('complete', `檢查完成 (插件: [${await checkPlugins(actuator.mainFilePath)}])`)
+    startTime = performance.now()
+    await checkPlugins(actuator.mainFilePath)
+    actuatorLog('complete', `檢查完成 (花費 ${Math.round(performance.now()-startTime)}ms)`)
     await sendMessage({ type: 'event', name: 'stateChange', value: 'running' })
     executeLoop()
   } else {

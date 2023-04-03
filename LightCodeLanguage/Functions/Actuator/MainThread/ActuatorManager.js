@@ -1,6 +1,8 @@
 import { Worker } from 'node:worker_threads'
 import fs from 'node:fs'
-import path from 'node:path'
+import path from 'node:path';
+import { fileURLToPath } from 'url';
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 let actuators = {}
 
@@ -9,7 +11,6 @@ export { actuators, createActuator, runActuator, stopActuator }
 import { error } from '../../Tools/Error.js'
 import generateID from '../../Tools/GenerateID.js'
 import getPath from '../../Tools/GetPath.js'
-import __dirname from '../../Tools/DirName.js'
 import defaultValue from '../../Tools/DefaultValue.js'
 import getVariableSize from '../../Tools/GetVariableSize.js'
 
@@ -70,6 +71,7 @@ async function runActuator (id) {
           resolve(data)
         }
       }
+      console.log(__dirname)
       actuators[id].worker = new Worker(getPath(__dirname, ['<', 'ChildThread', 'Actuator.js']), { workerData: { actuatorId: id, settings: actuators[id].settings, code: actuators[id].code, mainFilePath: actuators[id].mainFilePath }}) 
       actuators[id].worker.addListener('message', listenMessage)
     }
