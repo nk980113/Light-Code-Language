@@ -29,55 +29,64 @@ export default class Logger {
     config: OutputConfig;
     debug: (level: DebugLogLevel, content: string) => void;
     info: (content: string) => void;
-    // TODO: implement the save log part
+    saveLog: (content: string) => void;
+    log: string[] = [];
 
     constructor({
         logToConsole,
         saveLog,
-        interpreterLog,
+        debugLog,
         detailedError,
     }: OutputConfig = outputConfigValidator.parse({})) {
         this.config = {
             logToConsole,
             saveLog,
-            interpreterLog,
+            debugLog,
             detailedError,
         };
         if (logToConsole) {
-            this.debug = function debug(level, content) {
-                console.log(Logger.makeContent(`${Logger.prefix}Debug ${Logger.levelToStrMap[level]}`, content));
+            if (this.config.debugLog) {
+                this.debug = (level, content) => {
+                    console.log(Logger.makeContent(`${Logger.prefix}Debug ${Logger.levelToStrMap[level]}`, content));
+                }
+            } else {
+                this.debug = noop;
             }
             // TODO: check if this is for executing code
-            this.info = function info(content) {
+            this.info = (content) => {
                 console.log(content);
             }
         } else {
             this.debug = noop;
             this.info = noop;
         }
+        if (this.config.saveLog) {
+            this.saveLog = (content) => {
+                this.log.push(content)
+            }
+        }
     }
 
-    log: string[] = [];
-
-    error(position: string, content: string) {
+    error(position: string, content: string, exit: boolean = true) {
         console.error(Logger.makeContent(`${Logger.prefix}${position} ${Logger.errorPrefix}`, content));
-        process.exit(1);
+        if (exit) process.exit(1);
     }
 
-    errors(position: string, content: string[]) {
+    errors(position: string, content: string[], exit: boolean = true) {
         console.error(Logger.makeContent(`${Logger.prefix}${position} ${Logger.errorPrefix}`, [...content.map((v, i) => `${i} ${v}`), '由於上述錯誤，將自動退出程式']));
-        process.exit(1);
+        if (exit) process.exit(1);
     }
 
+    // TODO: implement this with the original implementation
     runtimeError(content: string) {
-        this.error('Runtime', content);
+        this.error('Runtime', content, false);
     }
 }
 
 export const outputConfigValidator = z.object({
     logToConsole: z.boolean().default(true),
     saveLog: z.boolean().default(false),
-    interpreterLog: z.boolean().default(false),
+    debugLog: z.boolean().default(false),
     detailedError: z.boolean().default(false),
 }).partial();
 
