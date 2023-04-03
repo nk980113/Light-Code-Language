@@ -1,4 +1,4 @@
-import { addAndRunChunk } from '../Actuator'
+import { addAndRunChunk } from '../Actuator.js'
 
 //取得物件
 export default function getObject (chunk, complexType) {

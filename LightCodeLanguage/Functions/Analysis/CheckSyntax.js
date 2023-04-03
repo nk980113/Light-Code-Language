@@ -1,6 +1,4 @@
-module.exports = checkSyntax
-
-const typesName = require('../TypesName.json')
+import typesName from '../TypesName.json' assert { type: 'json' }
 
 const relevance = {
   string: ['operators', 'parameters', 'index'],
@@ -21,7 +19,7 @@ const relevance = {
 }
 
 //檢查語法
-function checkSyntax (complexTypes) {
+export default function checkSyntax (complexTypes) {
   if (complexTypes.length < 1) return []
   for (let run = 0; run < complexTypes.length-1; run++) {
     if (complexTypes[run].type === ',' || complexTypes[run].type === ':') {

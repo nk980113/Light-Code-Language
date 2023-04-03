@@ -1,11 +1,9 @@
-module.exports = analysis
-
-const analysisSimpleTypes = require('./AnalysisSimpleTypes')
-const analysisComplexTypes = require('./AnalysisComplexTypes')
-const checkSyntax = require('./CheckSyntax')
+import analysisSimpleTypes from './AnalysisSimpleTypes.js'
+import analysisComplexTypes from './AnalysisComplexTypes.js'
+import checkSyntax from './CheckSyntax.js'
 
 //分析
-function analysis (code) {
+export default function analysis (code) {
   const simpleTypes = analysisSimpleTypes(code)
   if (!Array.isArray(simpleTypes)) return simpleTypes
   const complexTypes = analysisComplexTypes(simpleTypes)
