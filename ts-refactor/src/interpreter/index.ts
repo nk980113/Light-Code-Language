@@ -55,12 +55,12 @@ class InternalInterpreter {
     static async create(mainFilePath: string, config: InterpreterConfig): Promise<{ id: string; instance: InternalInterpreter; }> {
         const parseConfigResult = wrapZodError(configValidator, config, 'config');
         
-        if (!parseConfigResult.success) {
-            // @ts-ignore
+        if (parseConfigResult.success === false) {
             Logger.prototype.errors('Interpreter Create', parseConfigResult.errors);
+            // for type guard usage
+            throw '';
         }
 
-        // @ts-ignore
         const logger = new Logger(parseConfigResult.data);
 
         try {
