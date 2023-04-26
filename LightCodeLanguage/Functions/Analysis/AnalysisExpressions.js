@@ -1,11 +1,9 @@
-module.exports = analysisExpressions
-
-const checkSyntax = require('./CheckSyntax')
+import checkSyntax from './CheckSyntax.js'
 
 const expressionsOperators = ['+', '-', '*', '**', '/', '==', '>', '<', '>=', '<=']
 
 //分析運算式
-function analysisExpressions (complexTypes) {
+export default function analysisExpressions (complexTypes) {
   let complexTypes2 = []
   let state = {}
   for (let run = 0; run < complexTypes.length; run++) {

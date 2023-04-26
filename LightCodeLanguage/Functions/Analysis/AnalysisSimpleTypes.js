@@ -1,10 +1,8 @@
-module.exports = analysisSimpleTypes
-
 const operators = '+-*/><=或且'
-const builtInFunctions = require('../BuiltInFunctions.json')
+import builtInFunctions from '../BuiltInFunctions.json' assert { type: 'json' }
 
 //分析代碼成簡易類型
-function analysisSimpleTypes (code) {
+export default function analysisSimpleTypes (code) {
   let simpleTypes = []
   let state = {}
   let layer = 0

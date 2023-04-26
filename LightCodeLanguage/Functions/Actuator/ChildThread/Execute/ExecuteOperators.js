@@ -2,7 +2,7 @@ import checkSyntax from '../../../Analysis/CheckSyntax.js'
 import { actuator, addAndRunChunk } from '../Actuator.js'
 import { throwError } from '../ExecuteLoop.js'
 
-import typesName from '../../../TypesName.json.js'
+import typesName from '../../../TypesName.json' assert { type: 'json' }
 import getContainer from '../Get/GetContainer.js'
 
 //執行運算符

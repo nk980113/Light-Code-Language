@@ -1,10 +1,8 @@
-module.exports = analysisComplexTypes
-
-const checkSyntax = require('./CheckSyntax')
-const analysisExpressions = require('./AnalysisExpressions')
+import checkSyntax from './CheckSyntax.js'
+import analysisExpressions from './AnalysisExpressions.js'
 
 //分析複雜類型
-function analysisComplexTypes (simpleTypes) {
+export default function analysisComplexTypes (simpleTypes) {
   if (simpleTypes.length < 1) return []
   let complexTypes = []
   let state = {}

@@ -1,6 +1,6 @@
 export { addInterval, changeIntervalInterval,removeInterval }
 
-const generateID = require('./GenerateID')
+import generateID from './GenerateID.js'
 
 let timers = []
 
