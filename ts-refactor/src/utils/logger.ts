@@ -67,13 +67,15 @@ export default class Logger {
         }
     }
 
+    error(position: string, content: string, exit?: true): never;
+    error(position: string, content: string, exit: false): void;
     error(position: string, content: string, exit: boolean = true) {
         console.error(Logger.makeContent(`${Logger.prefix}${position} ${Logger.errorPrefix}`, content));
         if (exit) process.exit(1);
     }
 
     errors(position: string, content: string[], exit?: true): never;
-    errors(position: string, content: string[], exit: false): never;
+    errors(position: string, content: string[], exit: false): void;
     errors(position: string, content: string[], exit: boolean = true) {
         console.error(Logger.makeContent(`${Logger.prefix}${position} ${Logger.errorPrefix}`, [...content.map((v, i) => `${i} ${v}`), '由於上述錯誤，將自動退出程式']));
         if (exit) process.exit(1);

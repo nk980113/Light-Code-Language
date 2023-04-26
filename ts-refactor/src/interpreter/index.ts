@@ -110,11 +110,9 @@ class InternalInterpreter {
             this.state = {
                 status: Status.Pending,
                 onComplete: (result) => {
-                    if (!result.success) {
+                    if (result.success === false) {
                         this.logger.runtimeError('執行時出現錯誤：');
-                        // @ts-ignore
                         this.logger.runtimeError(result.error);
-                        // @ts-ignore
                         rej(result.error);
                     } else {
                         res(result.data);
