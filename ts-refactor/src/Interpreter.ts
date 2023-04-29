@@ -7,11 +7,11 @@ import { Worker } from 'node:worker_threads';
 import EventEmitter from 'node:events';
 import type TypedEmitterNamespace from 'typed-emitter';
 import autoBind from 'auto-bind';
-import { EventType, MessageType, Status, WithId, WorkerAckType, WorkerMessage } from '../types.js';
-import { outputConfigValidator } from '../utils/logger.js';
-import z, { wrapZodError } from '../utils/z.js';
-import Logger from '../utils/logger.js';
-import randomId from '../utils/random.js';
+import { EventType, MessageType, Status, WithId, WorkerAckType, WorkerMessage } from './types.js';
+import { outputConfigValidator } from './utils/logger.js';
+import z, { wrapZodError } from './utils/z.js';
+import Logger from './utils/logger.js';
+import randomId from './utils/random.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

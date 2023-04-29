@@ -1,1 +1,1 @@
-export * from './interpreter/index.js';
+export * from './interpreter.js';
