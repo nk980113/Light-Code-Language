@@ -1,18 +1,37 @@
-import { parentPort } from 'worker_threads';
-import { EventType, MessageType, Status, WorkerMessage } from '../types.js';
-import { setTimeout } from 'timers/promises';
+import { parentPort } from 'node:worker_threads';
+import { setTimeout } from 'node:timers/promises';
+import { EventType, MessageType, Status, WithId, WorkerAck, WorkerMessage } from '../types.js';
 
-function sendMessage(message: WorkerMessage) {
+let id = 0;
+
+function getId() {
+    return id++;
+}
+
+function sendMessage(message: WorkerMessage, ack: boolean = true) {
+    const id = getId();
     // TODO: implement ack
-    parentPort.postMessage(message);
+    parentPort.postMessage({
+        ...message,
+        id,
+    });
+    return new Promise<void>((res) => {
+        const onMessageListener = (message: WorkerAck & WithId) => {
+            if (message.id === id) {
+                parentPort.off('message', onMessageListener);
+                res();
+            }
+        };
+        parentPort.on('message', onMessageListener);
+    });
 }
 
 async function test() {
-    sendMessage({ type: MessageType.Event, event: { name: EventType.StateChange, value: Status.Analyzing } });
+    await sendMessage({ type: MessageType.Event, event: { name: EventType.StateChange, value: Status.Analyzing } });
     await setTimeout(3_000);
-    sendMessage({ type: MessageType.Event, event: { name: EventType.StateChange, value: Status.Running } });
+    await sendMessage({ type: MessageType.Event, event: { name: EventType.StateChange, value: Status.Running } });
     await setTimeout(3_000);
-    sendMessage({ type: MessageType.Stop, data: { success: true, data: 'Hello, world!' } });
+    await sendMessage({ type: MessageType.Stop, data: { success: true, data: 'Hello, world!' } });
 }
 
 test();

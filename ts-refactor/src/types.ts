@@ -6,6 +6,18 @@ export type WorkerMessage =
     | DebugMessage
     | LogMessage;
 
+export type WithId = {
+    id: number;
+};
+
+export enum WorkerAckType {
+    Ack = 'ack',
+}
+
+export type WorkerAck = {
+    type: WorkerAckType.Ack;
+}
+
 type StopMessage = {
     type: MessageType.Stop;
     data: ExecutionStopDataType;

@@ -7,7 +7,7 @@ import { Worker } from 'node:worker_threads';
 import EventEmitter from 'node:events';
 import type TypedEmitterNamespace from 'typed-emitter';
 import autoBind from 'auto-bind';
-import { EventType, MessageType, Status, WorkerMessage } from '../types.js';
+import { EventType, MessageType, Status, WithId, WorkerAckType, WorkerMessage } from '../types.js';
 import { outputConfigValidator } from '../utils/logger.js';
 import z, { wrapZodError } from '../utils/z.js';
 import Logger from '../utils/logger.js';
@@ -110,6 +110,7 @@ class InternalInterpreter {
             this.state = {
                 status: Status.Pending,
                 onComplete: (result) => {
+                    (this.state as NonIdleState).worker.off('message', this.listenMessage);
                     if (result.success === false) {
                         this.logger.runtimeError('執行時出現錯誤：');
                         this.logger.runtimeError(result.error);
@@ -123,10 +124,11 @@ class InternalInterpreter {
         });
     }
 
-    private listenMessage(message: WorkerMessage) {
+    private listenMessage(message: WorkerMessage & WithId) {
         switch (message.type) {
             case MessageType.Stop: {
                 (this.state as NonIdleState).onComplete(message.data);
+                (this.state as NonIdleState).worker.postMessage({ type: WorkerAckType.Ack, id: message.id });
                 this.state = { status: Status.Idle };
                 break;
             }
@@ -150,6 +152,9 @@ class InternalInterpreter {
             case MessageType.Log: {
                 this.logger.info(message.content);
             }
+        }
+        if (this.state.status !== Status.Idle) {
+            this.state.worker.postMessage({ type: WorkerAckType.Ack, id: message.id });
         }
     }
 }
